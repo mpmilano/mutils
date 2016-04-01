@@ -1,5 +1,5 @@
 #pragma once
-#include "utils.hpp"
+#include "mutils.hpp"
 #include <type_traits>
 
 namespace mutils{
@@ -31,15 +31,6 @@ namespace mutils{
 	template<template<typename> class Pred, typename Arg>
 	struct error_helper : std::integral_constant<bool, Pred<Arg>::value >{
 		static_assert(Pred<Arg>::value,"Static assert error");
-	};
-
-
-	struct NoOverloadFoundError : MyriaException{
-		const std::string mesg;
-		NoOverloadFoundError(const decltype(mesg)& m):mesg(m){}
-		const char * what() const _NOEXCEPT {
-			return mesg.c_str();
-		}
 	};
 
 #define DecayTraits(name) template<typename T> struct name<const T> : name<T> {}; \
