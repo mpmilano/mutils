@@ -7,7 +7,7 @@ SOURCES = utils.cpp
 HEADERS = AtScopeEnd.hpp  Hertz.hpp  args-finder.hpp  macro_utils.hpp  type_utils.hpp  utils.hpp
 OBJECTS=$(SOURCES:.cpp=.o)
 
-TARGET=mutils.so
+TARGET=libmutils.so
 
 all: $(TARGET)
 
