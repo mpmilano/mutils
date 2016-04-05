@@ -70,20 +70,36 @@ namespace mutils{
 				std::pair<int,int>{get_type_id<NameEnum>(),
 						static_cast<int>(name)});
 		}
+
+		std::map<std::pair<int,int>, std::string> default_strings;
+
+		template<typename NameEnum>
+		const std::string& lookup_default(NameEnum name) const {
+			return default_strings.at(
+				std::pair<int,int>{get_type_id<NameEnum>(),
+						static_cast<int>(name)});
+		}
 		
-		decltype(declaration_strings) init_declaration_strings() const {
-			return decltype(declaration_strings){};
+		
+		auto init_all_strings() const {
+			return std::pair<decltype(declaration_strings),decltype(default_strings)>{};
 		}
 		
 		template<typename NameEnum, typename... Rest>
-		decltype(declaration_strings) init_declaration_strings(const NameEnum name, const std::string &print_name, const Rest&... rst) const {
-			auto partial_map = init_declaration_strings(rst...);
-			partial_map[std::pair<int,int>{get_type_id<NameEnum>(), static_cast<int>(name)}] = print_name;
-			return partial_map;
+		auto init_all_strings(const NameEnum name, const std::string &print_name, const std::string &default_val, const Rest&... rst) const {
+			auto partial_maps = init_all_strings(rst...);
+			auto index = std::pair<int,int>{get_type_id<NameEnum>(), static_cast<int>(name)};
+			partial_maps.first[index] = print_name;
+			partial_maps.second[index] = default_val;
+			return partial_maps;
 		}
+
+		ObjectBuilder(const std::pair<std::map<std::pair<int,int>, std::string>,std::map<std::pair<int,int>, std::string> > &pair)
+			:declaration_strings(pair.first),default_strings(pair.second){}
 		
 		template<typename... name_string_list>
-		ObjectBuilder(const name_string_list&... nsl):declaration_strings(init_declaration_strings(nsl...))
+		ObjectBuilder(const name_string_list&... nsl)
+			:ObjectBuilder(init_all_strings(nsl...))
 			{}
 		
 		ObjectBuilder(const ObjectBuilder&) = delete;
@@ -119,10 +135,17 @@ namespace mutils{
 			
 			std::string print_data() const {
 				std::stringstream out;
+				auto data_str = [&](int i){
+					return (field_data.at(i).size() == 0
+							? parent.lookup_default(static_cast<FNameEnum>(i))
+							: field_data.at(i));
+				};
+				
 				for (int i = 0; i < field_data.size() -1; ++i){
-					out << field_data.at(i) << ", ";
+					out << data_str(i) << ", ";
 				}
-				out << field_data.at(field_data.size() -1);
+				auto last_entry = field_data.size() - 1;
+				out << data_str(last_entry);
 				return out.str();
 			}
 			
