@@ -18,6 +18,46 @@ namespace mutils{
 		
 	};
 	
+	struct abs_StructBuilder{
+		const std::string name;
+		abs_StructBuilder(const std::string name)
+			:name(name){}
+				
+		virtual abs_StructBuilder& addField_impl(int name, std::string data) = 0;
+
+		template<typename FNameEnum>
+		abs_StructBuilder& addField(FNameEnum Name, const std::string& data){
+			std::stringstream ss;
+			ss << "\"" << data << "\"";
+			return addField_impl(static_cast<int>(Name),ss.str());
+		}
+
+		template<typename FNameEnum, typename T>
+		abs_StructBuilder& addField(FNameEnum Name, const std::initializer_list<T>& data){
+			std::stringstream ss;
+			ss << "{";
+			int count;
+			for (auto& datum : data){
+				ss << datum;
+				if (count < data.size()) ss << ",";
+				++count;
+			}
+			ss << "}";
+			return addField_impl(static_cast<int>(Name),ss.str());
+		}
+		
+		template<typename FNameEnum, typename T>
+		std::enable_if_t<!std::is_same<std::decay_t<T>, std::string>::value,
+						 abs_StructBuilder&> addField(FNameEnum Name, const T& data){
+			std::stringstream ss;
+			ss << data;
+			return addField_impl(static_cast<int>(Name),ss.str());
+		}
+		
+		virtual std::string print_data() const = 0;
+		virtual ~abs_StructBuilder(){}
+	};
+	
 	template<typename StructNameEnum, typename... StructType>
 	struct ObjectBuilder{
 		static_assert(forall_nt(std::is_same<typename StructType::StructNameEnum, StructNameEnum>::value...), "Error: Name mismatch" );
@@ -58,37 +98,19 @@ namespace mutils{
 		template<StructNameEnum name>
 		using Lookup = typename Lookup_str<name>::type;
 		
-		struct abs_StructBuilder{
-			const StructNameEnum name;
-			abs_StructBuilder(const StructNameEnum name)
-				:name(name){}
-			abs_StructBuilder(const abs_StructBuilder &asb):name(asb.name){}
-
-			virtual abs_StructBuilder& addField_impl(int name, std::string data) = 0;
-			
-			template<typename FNameEnum, typename T>
-			abs_StructBuilder& addField(FNameEnum Name, const T& data){
-				std::stringstream ss;
-				ss << data;
-				return addField_impl(static_cast<int>(Name),ss.str());
-			}
-			
-			virtual std::string print_data() const = 0;
-			virtual ~abs_StructBuilder(){}
-		};
-		
+	
 		std::vector<std::unique_ptr<abs_StructBuilder> > instances;
 		
-		template<StructNameEnum name>
+		template<StructNameEnum Name>
 		struct StructBuilder : public abs_StructBuilder{
 			
-			using FNameEnum = typename Lookup<name>::StructFields;
+			using FNameEnum = typename Lookup<Name>::StructFields;
 			
 			std::array<std::string, static_cast<int>(FNameEnum::MAX)> field_data;
 			
 			ObjectBuilder &parent;
 			StructBuilder(ObjectBuilder& parent)
-				:abs_StructBuilder(name),parent(parent){}
+				:abs_StructBuilder(parent.lookup_declaration_string(Name) ),parent(parent){}
 			
 			StructBuilder& addField_impl(int _name, std::string data){
 				field_data[_name] = data;
@@ -151,7 +173,7 @@ namespace mutils{
 			std::stringstream out;
 			for (auto &ob_p : instances){
 				auto &ob = *ob_p;
-				out << "const " << lookup_declaration_string(ob.name) << " o" << i++ << "{" << ob.print_data() << "};" << std::endl;
+				out << "const " << ob.name << " o" << i++ << "{" << ob.print_data() << "};" << std::endl;
 			}
 			return out.str();
 		}
