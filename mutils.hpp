@@ -335,6 +335,17 @@ namespace mutils{
 		static auto id_for_T = type_id_counter(true);
 		return id_for_T;
 	}
+
+	template<typename T>
+	struct ReassignableReference{
+	private:
+		T *t;
+	public:
+		operator T&(){return *t;}
+		void reset(T& _t){this->t = & _t;}
+		
+		ReassignableReference(T& t):t(&t){}
+	};
 	
 }
 
