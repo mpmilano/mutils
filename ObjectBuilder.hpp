@@ -53,6 +53,8 @@ namespace mutils{
 			ss << data;
 			return addField_impl(static_cast<int>(Name),ss.str());
 		}
+
+		virtual std::string single() const = 0;
 		
 		virtual std::string print_data() const = 0;
 		virtual ~abs_StructBuilder(){}
@@ -132,7 +134,7 @@ namespace mutils{
 				field_data[_name] = data;
 				return *this;
 			}
-			
+
 			std::string print_data() const {
 				std::stringstream out;
 				auto data_str = [&](int i){
@@ -146,6 +148,12 @@ namespace mutils{
 				}
 				auto last_entry = field_data.size() - 1;
 				out << data_str(last_entry);
+				return out.str();
+			}
+
+			std::string single() const {
+				std::stringstream out;
+				out << "[]() -> " << this->name << " {" << this->name << " ret {" << print_data() << "}; return ret; }()";
 				return out.str();
 			}
 			
