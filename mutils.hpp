@@ -327,5 +327,14 @@ namespace mutils{
 	
 	std::string string_of_ip(unsigned int i);
 	
+	using type_id = int;
+	type_id type_id_counter(bool increment);
+	
+	template<typename T>
+	type_id get_type_id(){
+		static auto id_for_T = type_id_counter(true);
+		return id_for_T;
+	}
+	
 }
 

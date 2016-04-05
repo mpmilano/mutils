@@ -94,5 +94,13 @@ namespace mutils{
 			return std::string(str);
 		}
 	}
+
+	type_id type_id_counter(bool increment){
+		static type_id counter = 0;
+		if (increment) ++counter;
+		return counter;
+	}
+
+
 }
 

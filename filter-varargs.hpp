@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mutils.hpp>
+#include "mutils.hpp"
 #include "tuple_extras.hpp"
 
 namespace mutils{
@@ -22,6 +22,6 @@ namespace mutils{
 	template <template<typename> class Predicate, typename Head, typename... Tail>
 	struct filter<Predicate, std::tuple<Head, Tail...> > : filter<Predicate,Head,Tail...> {};
 
-	template <template<typename> class Predicate, typename Tail>
-	using filter_t = filter<Predicate,Tail>; 
+	template <template<typename> class Predicate, typename... Tail>
+	using filter_t = typename filter<Predicate,Tail...>::type; 
 }
