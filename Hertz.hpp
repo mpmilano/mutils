@@ -33,7 +33,7 @@ namespace mutils{
 	}
 
 	std::ostream& operator<<(std::ostream& os, const Frequency &freq){
-		return os << freq.hertz << "Hz";
+		return os << freq.hertz << "_Hz";
 	}
 
 }
