@@ -1,5 +1,6 @@
-#include <mutils.hpp>
+#include "mutils.hpp"
 #include <arpa/inet.h>
+#include "Hertz.hpp"
 
 namespace mutils{
 
@@ -101,6 +102,15 @@ namespace mutils{
 		return counter;
 	}
 
+}
+	//Frequency stuff
+	
+namespace mutils{
+	
+	void Frequency::Print() const { std::cout << hertz << "Hz\n"; }
+
+	std::ostream& operator<<(std::ostream& os, const Frequency &freq){
+		return os << freq.hertz << "_Hz";
+	}
 
 }
-

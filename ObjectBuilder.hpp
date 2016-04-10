@@ -24,6 +24,7 @@ namespace mutils{
 			:name(name){}
 				
 		virtual abs_StructBuilder& addField_impl(int name, std::string data) = 0;
+		virtual const std::string& getField_impl(int name) = 0;
 
 		template<typename FNameEnum>
 		abs_StructBuilder& addField(FNameEnum Name, const std::string& data){
@@ -44,6 +45,16 @@ namespace mutils{
 			}
 			ss << "}";
 			return addField_impl(static_cast<int>(Name),ss.str());
+		}
+
+		template<typename FNameEnum>
+		const std::string& getField(FNameEnum Name) {
+			return getField_impl(static_cast<int>(Name));
+		}
+
+		template<typename FNameEnum>
+		void incrementIntField(FNameEnum Name) {
+			addField(Name,1 + std::stoi(getField(Name)));
 		}
 		
 		template<typename FNameEnum, typename T>
@@ -68,9 +79,14 @@ namespace mutils{
 		
 		template<typename NameEnum>
 		const std::string& lookup_declaration_string(NameEnum name) const {
-			return declaration_strings.at(
-				std::pair<int,int>{get_type_id<NameEnum>(),
-						static_cast<int>(name)});
+			auto key = std::pair<int,int>{get_type_id<NameEnum>(),
+										  static_cast<int>(name)};
+			if (declaration_strings.count(key) == 0){
+				std::cerr << "looking for a key that's not there!" << std::endl;
+				std::cerr << "NameEnum: " << type_name<NameEnum>() << std::endl;
+				std::cerr << "Name: " << name << std::endl;
+			}
+			return declaration_strings.at(key);
 		}
 
 		std::map<std::pair<int,int>, std::string> default_strings;
@@ -129,6 +145,12 @@ namespace mutils{
 			ObjectBuilder &parent;
 			StructBuilder(ObjectBuilder& parent)
 				:abs_StructBuilder(parent.lookup_declaration_string(Name) ),parent(parent){}
+
+			std::string& getField_impl(int _name) {
+				if (field_data.at(_name).length() == 0)
+					field_data[_name] = parent.lookup_default((FNameEnum)_name);
+				return field_data.at(_name);
+			}
 			
 			StructBuilder& addField_impl(int _name, std::string data){
 				field_data[_name] = data;

@@ -4,36 +4,35 @@ namespace mutils{
 
 	struct Frequency
 	{
-		void Print() const { std::cout << hertz << "Hz\n"; }
+		void Print() const;
 		const unsigned long long hertz;
-		constexpr auto operator+(const Frequency& fr) const {
+		constexpr Frequency operator+(const Frequency& fr) const{
 			return Frequency{fr.hertz + hertz};
 		}
-		constexpr auto operator*(const Frequency& fr) const {
+		constexpr Frequency operator*(const Frequency& fr) const{
 			return Frequency{fr.hertz * hertz};
 		}
 	};
+	
 	constexpr Frequency operator"" _Hz(unsigned long long hz)
 	{
 		return Frequency{hz};
 	}
 	constexpr Frequency operator"" _kHz(long double khz)
 	{
-		unsigned long long coerce = khz * 1000;
-		return Frequency{coerce};
+		return Frequency{((unsigned long long)khz) * 1000};
 	}
 	constexpr Frequency operator"" _kHz(unsigned long long khz)
 	{
-		unsigned long long coerce = khz * 1000;
-		return Frequency{coerce};
+		return Frequency{khz * 1000};
 	}
 
 	constexpr Frequency as_hertz(unsigned long long hz){
 		return Frequency{hz};
 	}
-
-	std::ostream& operator<<(std::ostream& os, const Frequency &freq){
-		return os << freq.hertz << "_Hz";
-	}
+	
+	std::ostream& operator<<(std::ostream& os, const Frequency &freq);
 
 }
+
+

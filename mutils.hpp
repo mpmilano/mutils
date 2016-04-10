@@ -342,6 +342,8 @@ namespace mutils{
 		T *t;
 	public:
 		operator T&(){return *t;}
+		T& get(){return *t;}
+		const T& get() const {return *t;}
 		void reset(T& _t){this->t = & _t;}
 		
 		ReassignableReference(T& t):t(&t){}
