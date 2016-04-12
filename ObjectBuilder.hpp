@@ -95,9 +95,11 @@ namespace mutils{
 
 		template<typename NameEnum>
 		const std::string& lookup_default(NameEnum name) const {
-			return default_strings.at(
-				std::pair<int,int>{get_type_id<NameEnum>(),
-						static_cast<int>(name)});
+			auto key = std::pair<int,int>{get_type_id<NameEnum>(),
+										  static_cast<int>(name)};
+			assert(declaration_strings.count(key) > 0);
+			return default_strings.at(key);
+				
 		}
 		
 		
@@ -114,8 +116,32 @@ namespace mutils{
 			return partial_maps;
 		}
 
+		template<typename FNameEnum>
+		struct ctr_sanity_check_inner{
+			const ObjectBuilder &ob;
+			
+			template<FNameEnum name>
+			auto fun(const std::string &accum) const {
+				assert(ob.lookup_declaration_string(name) != ob.lookup_default(name));
+				return accum;
+			}
+		};
+
+		struct ctr_sanity_check_outer {
+			const ObjectBuilder &ob;
+			
+			template<StructNameEnum name>
+			auto fun(const std::string &accum) const {
+				assert(ob.lookup_declaration_string(name) != ob.lookup_default(name));
+				using FNameEnum = typename Lookup<name>::StructFields;
+				return enum_fold<FNameEnum >(ctr_sanity_check_inner<FNameEnum>{ob},accum);
+			}
+		};
+
 		ObjectBuilder(const std::pair<std::map<std::pair<int,int>, std::string>,std::map<std::pair<int,int>, std::string> > &pair)
-			:declaration_strings(pair.first),default_strings(pair.second){}
+			:declaration_strings(pair.first),default_strings(pair.second){
+			enum_fold<StructNameEnum>(ctr_sanity_check_outer{*this},"");
+		}
 		
 		template<typename... name_string_list>
 		ObjectBuilder(const name_string_list&... nsl)
