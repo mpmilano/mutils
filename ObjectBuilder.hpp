@@ -22,6 +22,8 @@ namespace mutils{
 		const std::string name;
 		abs_StructBuilder(const std::string name)
 			:name(name){}
+
+		abs_StructBuilder(const abs_StructBuilder&) = delete;
 				
 		virtual abs_StructBuilder& addField_impl(int name, std::string data) = 0;
 		virtual const std::string& getField_impl(int name) = 0;
@@ -133,8 +135,6 @@ namespace mutils{
 		using Lookup = typename Lookup_str<name>::type;
 		
 	
-		std::vector<std::unique_ptr<abs_StructBuilder> > instances;
-		
 		template<StructNameEnum Name>
 		struct StructBuilder : public abs_StructBuilder{
 			
@@ -183,11 +183,8 @@ namespace mutils{
 		};
 		
 		template<StructNameEnum Name>
-		StructBuilder<Name>& beginStruct(){
-			auto ptr = std::make_unique<StructBuilder<Name> >(*this);
-			auto &ret = *ptr;
-			instances.emplace_back(std::move(ptr));
-			return ret;
+		std::unique_ptr<StructBuilder<Name> > beginStruct(){
+			return std::make_unique<StructBuilder<Name> >(*this);
 		}
 		
 		
@@ -221,14 +218,5 @@ namespace mutils{
 			return enum_fold<StructNameEnum>(fold_fun{*this},"");
 		}
 		
-		std::string objects() const {
-			int i = 0;
-			std::stringstream out;
-			for (auto &ob_p : instances){
-				auto &ob = *ob_p;
-				out << "const " << ob.name << " o" << i++ << "{" << ob.print_data() << "};" << std::endl;
-			}
-			return out.str();
-		}
 	};
 }
