@@ -5,15 +5,6 @@
 #include "type_utils.hpp"
 #include "Profiler.hpp"
 
-struct TemporarilySuspendProfiling {
-	TemporarilySuspendProfiling(const TemporarilySuspendProfiling& = delete){}
-
-	TemporarilySuspendProfiling(){
-		
-	}
-	
-};
-
 /**
  * I intend to use this to print out valid C++ source code containing logging information. 
  * The idea is that I can then write C++ programs which analyze the logged information. 
@@ -40,7 +31,7 @@ namespace mutils{
 
 		template<typename FNameEnum>
 		abs_StructBuilder& addField(FNameEnum Name, const std::string& data){
-			Profiler
+			auto pause = Profiler::ensureProfiling()->pause();
 			std::stringstream ss;
 			ss << "\"" << data << "\"";
 			return addField_impl(static_cast<int>(Name),ss.str());
@@ -48,6 +39,7 @@ namespace mutils{
 
 		template<typename FNameEnum, typename T>
 		abs_StructBuilder& addField(FNameEnum Name, const std::initializer_list<T>& data){
+			auto pause = Profiler::ensureProfiling()->pause();
 			std::stringstream ss;
 			ss << "{";
 			int count;
@@ -62,11 +54,13 @@ namespace mutils{
 
 		template<typename FNameEnum>
 		const std::string& getField(FNameEnum Name) {
+			auto pause = Profiler::ensureProfiling()->pause();
 			return getField_impl(static_cast<int>(Name));
 		}
 
 		template<typename FNameEnum>
 		void incrementIntField(FNameEnum Name) {
+			auto pause = Profiler::ensureProfiling()->pause();
 			addField(Name,1 + std::stoi(getField(Name)));
 		}
 		

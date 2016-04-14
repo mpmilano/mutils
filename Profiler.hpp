@@ -56,9 +56,13 @@ public:
 		ProfilerPauseScopeGoverner(const ProfilerPauseScopeGoverner&) = delete;
 		friend class Profiler;
 	};
-	friend class ProfilerPauseScopeGoverner;
+	friend struct ProfilerPauseScopeGoverner;
 	
 	friend struct ProfilerScopeGoverner;
+
+	Profiler() = delete;
+	Profiler(const Profiler&) = delete;
+	~Profiler() = delete;
 
 	static ProfilerActive ensureProfiling();
 };
