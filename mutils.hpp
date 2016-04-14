@@ -209,6 +209,8 @@ namespace mutils{
 
 	int gensym();
 
+	int get_thread_id();
+
 	std::vector<std::string> read_dir(const std::string &name);
 
 	template<typename T>

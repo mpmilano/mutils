@@ -5,7 +5,7 @@ TARGET=libmutils.so
 CPPFLAGS=-fPIC -g --std=c++14 
 LDFLAGS=-shared -Wl,-rpath=$(shell pwd)/ --enable-new-dtags
 
-SOURCES = utils.cpp
+SOURCES = utils.cpp Profiler.cpp
 
 HEADERS = AtScopeEnd.hpp ObjectBuilder.hpp backtrace.hpp compile-time-tuple.hpp macro_utils.hpp restrict.hpp type_utils.hpp Hertz.hpp args-finder.hpp compile-time-lambda.hpp filter-varargs.hpp mutils.hpp tuple_extras.hpp
 OBJECTS=$(SOURCES:.cpp=.o)

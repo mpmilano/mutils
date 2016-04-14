@@ -20,6 +20,12 @@ namespace mutils{
 		return ++counter;
 	}
 
+	int get_thread_id(){
+		static int id {0};
+		thread_local int tid = id++;
+		return tid;
+	}
+
 	std::vector<std::string> read_dir(const std::string &name){
 
 		std::vector<std::string> ret;

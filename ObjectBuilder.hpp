@@ -3,6 +3,16 @@
 #include <map>
 #include "filter-varargs.hpp"
 #include "type_utils.hpp"
+#include "Profiler.hpp"
+
+struct TemporarilySuspendProfiling {
+	TemporarilySuspendProfiling(const TemporarilySuspendProfiling& = delete){}
+
+	TemporarilySuspendProfiling(){
+		
+	}
+	
+};
 
 /**
  * I intend to use this to print out valid C++ source code containing logging information. 
@@ -30,6 +40,7 @@ namespace mutils{
 
 		template<typename FNameEnum>
 		abs_StructBuilder& addField(FNameEnum Name, const std::string& data){
+			Profiler
 			std::stringstream ss;
 			ss << "\"" << data << "\"";
 			return addField_impl(static_cast<int>(Name),ss.str());
