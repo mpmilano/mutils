@@ -3,9 +3,9 @@
 #include <mutex>
 #include <memory>
 #include <cassert>
-#include <map>
 #include <thread>
 #include "gperftools/profiler.h"
+#include "FunctionalMap.hpp"
 
 namespace mutils{
 
@@ -23,9 +23,11 @@ public:
 
 		using paused_wp = std::weak_ptr<ProfilerPauseScopeGoverner>;
 
-		using pause_map = std::map<std::thread::id,std::pair<bool, paused_wp> >;
+		using pause_map_ns = map<std::thread::id,std::pair<bool, paused_wp> >;
+		using pause_map = typename pause_map_ns::mapnode;
 		
-		std::shared_ptr<pause_map> thread_pausing;
+		pause_map thread_pausing;
+		bool thread_locked;
 		
 		std::mutex m;
 		const ProfilerOptions profopts;
@@ -40,6 +42,10 @@ public:
 		ProfilerScopeGoverner(const ProfilerScopeGoverner&) = delete;
 
 		ProfilerPaused pause();
+
+		bool paused() const ;
+
+		void threadLock();
 		
 		virtual ~ProfilerScopeGoverner();
 	};
@@ -64,7 +70,7 @@ public:
 	Profiler(const Profiler&) = delete;
 	~Profiler() = delete;
 
-	static ProfilerActive ensureProfiling();
+	static ProfilerActive ensureProfiling(bool assertActive = false);
 };
 
 }

@@ -67,6 +67,7 @@ namespace mutils{
 		template<typename FNameEnum, typename T>
 		std::enable_if_t<!std::is_same<std::decay_t<T>, std::string>::value,
 						 abs_StructBuilder&> addField(FNameEnum Name, const T& data){
+			auto pause = Profiler::ensureProfiling()->pause();
 			std::stringstream ss;
 			ss << data;
 			return addField_impl(static_cast<int>(Name),ss.str());
@@ -86,6 +87,7 @@ namespace mutils{
 		
 		template<typename NameEnum>
 		const std::string& lookup_declaration_string(NameEnum name) const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			auto key = std::pair<int,int>{get_type_id<NameEnum>(),
 										  static_cast<int>(name)};
 			if (declaration_strings.count(key) == 0){
@@ -100,6 +102,7 @@ namespace mutils{
 
 		template<typename NameEnum>
 		const std::string& lookup_default(NameEnum name) const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			auto key = std::pair<int,int>{get_type_id<NameEnum>(),
 										  static_cast<int>(name)};
 			assert(declaration_strings.count(key) > 0);
@@ -114,6 +117,7 @@ namespace mutils{
 		
 		template<typename NameEnum, typename... Rest>
 		auto init_all_strings(const NameEnum name, const std::string &print_name, const std::string &default_val, const Rest&... rst) const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			auto partial_maps = init_all_strings(rst...);
 			auto index = std::pair<int,int>{get_type_id<NameEnum>(), static_cast<int>(name)};
 			partial_maps.first[index] = print_name;
@@ -145,6 +149,7 @@ namespace mutils{
 
 		ObjectBuilder(const std::pair<std::map<std::pair<int,int>, std::string>,std::map<std::pair<int,int>, std::string> > &pair)
 			:declaration_strings(pair.first),default_strings(pair.second){
+			auto pause = Profiler::ensureProfiling()->pause();
 			enum_fold<StructNameEnum>(ctr_sanity_check_outer{*this},"");
 		}
 		
@@ -178,17 +183,20 @@ namespace mutils{
 				:abs_StructBuilder(parent.lookup_declaration_string(Name) ),parent(parent){}
 
 			std::string& getField_impl(int _name) {
+				auto pause = Profiler::ensureProfiling()->pause();
 				if (field_data.at(_name).length() == 0)
 					field_data[_name] = parent.lookup_default((FNameEnum)_name);
 				return field_data.at(_name);
 			}
 			
 			StructBuilder& addField_impl(int _name, std::string data){
+				auto pause = Profiler::ensureProfiling()->pause();
 				field_data[_name] = data;
 				return *this;
 			}
 
 			std::string print_data() const {
+				auto pause = Profiler::ensureProfiling()->pause();
 				std::stringstream out;
 				auto data_str = [&](int i){
 					return (field_data.at(i).size() == 0
@@ -205,6 +213,7 @@ namespace mutils{
 			}
 
 			std::string single() const {
+				auto pause = Profiler::ensureProfiling()->pause();
 				std::stringstream out;
 				out << "[]() -> " << this->name << " {" << this->name << " ret {" << print_data() << "}; return ret; }()";
 				return out.str();
@@ -215,6 +224,7 @@ namespace mutils{
 		
 		template<StructNameEnum Name>
 		std::unique_ptr<StructBuilder<Name> > beginStruct(){
+			auto pause = Profiler::ensureProfiling()->pause();
 			return std::make_unique<StructBuilder<Name> >(*this);
 		}
 		
@@ -223,6 +233,7 @@ namespace mutils{
 		
 		template<typename NameEnum>
 		std::string printWithData(NameEnum name, std::string data) const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			std::stringstream ss;
 			ss << lookup_declaration_string(name) << " { " << data << " }; " << std::endl;
 			return ss.str();
@@ -230,6 +241,7 @@ namespace mutils{
 		
 		template<typename FNameEnum>
 		std::string listMembers() const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			std::stringstream accum;
 			for (auto i = 0; i < static_cast<int>(FNameEnum::MAX); ++i){
 				accum << "const " << lookup_declaration_string(static_cast<FNameEnum>(i)) << "; ";
@@ -246,6 +258,7 @@ namespace mutils{
 			}
 		};
 		std::string declarations() const {
+			auto pause = Profiler::ensureProfiling()->pause();
 			return enum_fold<StructNameEnum>(fold_fun{*this},"");
 		}
 		

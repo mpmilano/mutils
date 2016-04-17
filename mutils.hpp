@@ -144,7 +144,7 @@ namespace mutils{
 		unique_id(const char str[i]){
 			return (i == 0 ? 0 : (str[0] << sizeof(char)*i ) + unique_id<i-1>(str+1));
 		}
-
+	
 	template <class T>
 	std::string
 	type_name()
@@ -171,7 +171,6 @@ namespace mutils{
 			r += "&&";
 		return r;
 	}
-
 
 	template<typename A, typename B>
 	constexpr auto conditional(std::true_type*, const A a, const B &){

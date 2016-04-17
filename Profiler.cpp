@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cstring>
 #include <cstdlib>
 #include "Profiler.hpp"
@@ -12,12 +13,13 @@ namespace mutils{
 	Profiler::ProfilerPauseScopeGoverner::~ProfilerPauseScopeGoverner(){
 		active->thread_pausing->at(std::this_thread::get_id()).first = false;
 	}
-
-	Profiler::ProfilerActive Profiler::ensureProfiling() {
+	
+	Profiler::ProfilerActive Profiler::ensureProfiling(bool assertActive) {
 		static std::mutex m;
 		std::unique_lock<std::mutex> lock{m};
 		static std::weak_ptr<ProfilerScopeGoverner> _current;
 		ProfilerActive candidate = _current.lock();
+		assert(assertActive ? bool{candidate.get() != nullptr} : true);
 		if (candidate) return candidate;
 		else {
 			ProfilerActive ret{new ProfilerScopeGoverner{}}; //calls ProfilerStart
@@ -27,16 +29,12 @@ namespace mutils{
 	}
 
 	Profiler::ProfilerScopeGoverner::ProfilerScopeGoverner():
-		thread_pausing{new pause_map{}},
+		thread_pausing{pause_map_ns::mk_empty()},
+		thread_locked(false),
 		profopts{
 			[](void* v) -> int {
-				auto pause_lock = *((decltype(thread_pausing)*) v); //well this probably is *not* safe
-				const pause_map& thread_pausing = *pause_lock;
-				auto tid = std::this_thread::get_id();
-				return (thread_pausing.count(tid) > 0 ? 
-						!thread_pausing.at(tid).first :
-						true);
-			},&thread_pausing}{
+				return ((ProfilerScopeGoverner*)v)->paused();
+			},this}{
 			static char fname[500];
 			static bool first_run = true;
 			if (first_run) {
@@ -48,30 +46,43 @@ namespace mutils{
 			}
 			ProfilerStartWithOptions(fname,&profopts);
 		}
+
+	void Profiler::ProfilerScopeGoverner::threadLock(){
+		thread_locked = true;
+	}
 	
 	typename Profiler::ProfilerPaused Profiler::ProfilerScopeGoverner::pause(){
-		auto tid = std::this_thread::get_id();
+		const auto tid = std::this_thread::get_id();
 		{
 			//take a candidate from the map, creating a new entry in the map
 			//for this thread if none exists
-			auto pausing_p = thread_pausing;
-			if (pausing_p->count(tid) == 0){
+			if (!pause_map_ns::mem(tid,thread_pausing)){
+				if (thread_locked){
+					std::cerr << "this thread is new! We've already seen " << pausing_p->size() << std::endl;
+					}
+				else {
+				}
+				assert(!thread_locked);
 				std::unique_lock<std::mutex> lock{m};
-				//copy the old map to a new map
-				auto newmap = std::make_shared<pause_map>(*pausing_p);
-				//add a new entry to the new map
-				(*newmap)[tid].first = false;
-				thread_pausing = newmap;
+				const auto curr_size = pause_map_ns::size(thread_pausing);
+				thread_pausing = pause_map_ns::add(tid,?,thread_pausing);
+				assert(pause_map_ns::size(thread_pausing) == curr_size + 1);
 			}
-			
 		}
-		ProfilerPaused candidate = thread_pausing->at(tid).second.lock();
+		ProfilerPaused candidate = pause_map_ns::find(tid,thread_pausing).second.lock();
 		if (candidate) return candidate;
 		else {
 			ProfilerPaused ret{new ProfilerPauseScopeGoverner{}};
-			thread_pausing->at(tid).second = ret;
+			pause_map_ns::find(tid,thread_pausing).second = ret;
 			return ret;
 		}
+	}
+
+	bool Profiler::ProfilerScopeGoverner::paused() const {
+		auto tid = std::this_thread::get_id();
+		return (pause_map_ns::mem(tid,thread_pausing) ? 
+				!pause_map_ns::find(tid,thread_pausing).first :
+				true);
 	}
 	
 	Profiler::ProfilerScopeGoverner::~ProfilerScopeGoverner(){
