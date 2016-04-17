@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <mutex>
+#include <list>
 #include <memory>
 #include <cassert>
 #include <thread>
@@ -12,21 +13,22 @@ namespace mutils{
 
 class Profiler {
 	
-public: 
+public:
 
 	struct ProfilerPauseScopeGoverner;
+	
+	using paused_wp = std::weak_ptr<ProfilerPauseScopeGoverner>;
+	using pause_map_ns = functional_map<std::thread::id,std::pair<bool, paused_wp>* >;
 	
 	using ProfilerPaused = std::shared_ptr<ProfilerPauseScopeGoverner>;
 	
 	struct ProfilerScopeGoverner {
 	private:
 
-		using paused_wp = std::weak_ptr<ProfilerPauseScopeGoverner>;
-
-		using pause_map_ns = map<std::thread::id,std::pair<bool, paused_wp> >;
 		using pause_map = typename pause_map_ns::mapnode;
 		
 		pause_map thread_pausing;
+		std::list<std::unique_ptr<std::pair<bool,paused_wp> > > memory;
 		bool thread_locked;
 		
 		std::mutex m;
@@ -49,13 +51,13 @@ public:
 		
 		virtual ~ProfilerScopeGoverner();
 	};
-	using ProfilerActive = std::shared_ptr<ProfilerScopeGoverner>;
+	using ProfilerActive = ProfilerScopeGoverner*;
 
 	struct ProfilerPauseScopeGoverner{
 
 	private:
 		ProfilerActive active;
-		ProfilerPauseScopeGoverner();
+		ProfilerPauseScopeGoverner(ProfilerActive);
 	public:
 
 		virtual ~ProfilerPauseScopeGoverner();
@@ -70,7 +72,11 @@ public:
 	Profiler(const Profiler&) = delete;
 	~Profiler() = delete;
 
-	static ProfilerActive ensureProfiling(bool assertActive = false);
+	static ProfilerActive startProfiling(bool assertActive = false);
+	static ProfilerActive stopProfiling(bool assertActive = false);
+	static ProfilerActive profiling();
+	static ProfilerPaused pauseIfActive();
+	static bool pausedOrInactive();
 };
 
 }

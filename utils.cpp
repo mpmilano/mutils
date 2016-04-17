@@ -66,7 +66,7 @@ namespace mutils{
 	}
 	
 	double better_rand(){
-		auto pause  = Profiler::ensureProfiling()->pause();
+		auto pause = Profiler::pauseIfActive();
 		discard(init_rand());
 		return drand48();
 	}

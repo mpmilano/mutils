@@ -2,38 +2,83 @@
 #include <cstring>
 #include <cstdlib>
 #include "Profiler.hpp"
+#include "GC_pointer.hpp"
 
 namespace mutils{
 
-	Profiler::ProfilerPauseScopeGoverner::ProfilerPauseScopeGoverner():active(ensureProfiling()){
+	Profiler::ProfilerPauseScopeGoverner::ProfilerPauseScopeGoverner(Profiler::ProfilerActive pa):active(pa){
 		assert(active);
-		active->thread_pausing->at(std::this_thread::get_id()).first = true;
+		const auto tid = std::this_thread::get_id();
+		pause_map_ns::find(tid,active->thread_pausing)->first = true;
+		assert(pause_map_ns::find(tid,active->thread_pausing)->first == true);
+		assert(pause_map_ns::mem(tid,active->thread_pausing));
+		assert(active->paused());
 	}
 	
 	Profiler::ProfilerPauseScopeGoverner::~ProfilerPauseScopeGoverner(){
-		active->thread_pausing->at(std::this_thread::get_id()).first = false;
+		const auto tid = std::this_thread::get_id();
+		pause_map_ns::find(tid,active->thread_pausing)->first = false;
+		assert(pause_map_ns::find(tid,active->thread_pausing)->first == false);
+		assert(pause_map_ns::mem(tid,active->thread_pausing));
+		assert(!active->paused());
 	}
-	
-	Profiler::ProfilerActive Profiler::ensureProfiling(bool assertActive) {
-		static std::mutex m;
-		std::unique_lock<std::mutex> lock{m};
-		static std::weak_ptr<ProfilerScopeGoverner> _current;
-		ProfilerActive candidate = _current.lock();
-		assert(assertActive ? bool{candidate.get() != nullptr} : true);
-		if (candidate) return candidate;
-		else {
-			ProfilerActive ret{new ProfilerScopeGoverner{}}; //calls ProfilerStart
-			_current = ret;
+
+	namespace {
+		Profiler::ProfilerActive& staticmem(){
+			static Profiler::ProfilerActive ret{nullptr};
 			return ret;
 		}
+
+		std::mutex& staticmutex(){
+			static std::mutex m;
+			return m;
+		}
+	}
+	
+	Profiler::ProfilerActive Profiler::startProfiling(bool assertActive) {
+		auto &ret = staticmem();
+		assert(!assertActive || bool{ret});
+		if (!ret) {
+			std::unique_lock<std::mutex> lock{staticmutex()};
+			if (!ret) staticmem() = new ProfilerScopeGoverner();
+		}
+		return ret;
+	}
+
+	Profiler::ProfilerActive Profiler::stopProfiling(bool assertActive){
+		assert(!assertActive || !staticmem());
+		auto &ret = staticmem();
+		if (ret){
+			std::unique_lock<std::mutex> lock{staticmutex()};
+			if (ret) {
+				delete staticmem(); staticmem() = nullptr;
+			}
+		}
+		return staticmem();
+	}
+
+	Profiler::ProfilerActive Profiler::profiling(){
+		return staticmem();
+	}
+	
+	Profiler::ProfilerPaused Profiler::pauseIfActive(){
+		if (auto *prof = profiling())
+			return prof->pause();
+		else return ProfilerPaused{nullptr};
+	}
+
+	bool Profiler::pausedOrInactive(){
+		if (auto *prof = profiling())
+			return prof->paused();
+		else return true;
 	}
 
 	Profiler::ProfilerScopeGoverner::ProfilerScopeGoverner():
-		thread_pausing{pause_map_ns::mk_empty()},
+		thread_pausing{pause_map_ns::mk_empty(GC_manager::inst())},
 		thread_locked(false),
 		profopts{
 			[](void* v) -> int {
-				return ((ProfilerScopeGoverner*)v)->paused();
+				return !((ProfilerScopeGoverner*)v)->paused();
 			},this}{
 			static char fname[500];
 			static bool first_run = true;
@@ -58,22 +103,30 @@ namespace mutils{
 			//for this thread if none exists
 			if (!pause_map_ns::mem(tid,thread_pausing)){
 				if (thread_locked){
-					std::cerr << "this thread is new! We've already seen " << pausing_p->size() << std::endl;
+					std::cerr << "this thread is new! We've already seen " << pause_map_ns::size(thread_pausing) << std::endl;
 					}
 				else {
 				}
 				assert(!thread_locked);
 				std::unique_lock<std::mutex> lock{m};
 				const auto curr_size = pause_map_ns::size(thread_pausing);
-				thread_pausing = pause_map_ns::add(tid,?,thread_pausing);
+				auto np = std::make_unique<std::pair<bool,paused_wp> >();
+				thread_pausing = pause_map_ns::add(GC_manager::inst(),tid,np.get(),thread_pausing);
+				memory.push_back(std::move(np));
 				assert(pause_map_ns::size(thread_pausing) == curr_size + 1);
 			}
 		}
-		ProfilerPaused candidate = pause_map_ns::find(tid,thread_pausing).second.lock();
-		if (candidate) return candidate;
+		thread_local auto* pause_tracker = pause_map_ns::find(tid,thread_pausing);
+		assert(pause_map_ns::find(tid,thread_pausing) == pause_tracker);
+		ProfilerPaused candidate = pause_tracker->second.lock();
+		if (candidate) {
+			assert(paused());
+			return candidate;
+		}
 		else {
-			ProfilerPaused ret{new ProfilerPauseScopeGoverner{}};
-			pause_map_ns::find(tid,thread_pausing).second = ret;
+			ProfilerPaused ret{new ProfilerPauseScopeGoverner{this}};
+			pause_map_ns::find(tid,thread_pausing)->second = ret;
+			assert(paused());
 			return ret;
 		}
 	}
@@ -81,8 +134,8 @@ namespace mutils{
 	bool Profiler::ProfilerScopeGoverner::paused() const {
 		auto tid = std::this_thread::get_id();
 		return (pause_map_ns::mem(tid,thread_pausing) ? 
-				!pause_map_ns::find(tid,thread_pausing).first :
-				true);
+				pause_map_ns::find(tid,thread_pausing)->first :
+				false);
 	}
 	
 	Profiler::ProfilerScopeGoverner::~ProfilerScopeGoverner(){
