@@ -1,7 +1,6 @@
 #include "mutils.hpp"
 #include <arpa/inet.h>
 #include "Hertz.hpp"
-#include "Profiler.hpp"
 
 namespace mutils{
 
@@ -66,7 +65,6 @@ namespace mutils{
 	}
 	
 	double better_rand(){
-		auto pause = Profiler::pauseIfActive();
 		discard(init_rand());
 		return drand48();
 	}
