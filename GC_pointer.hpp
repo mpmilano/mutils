@@ -63,7 +63,7 @@ namespace mutils{
 		}
 
 		template<typename T2>
-		GC_ptr<T2> downCast() const {
+		inline GC_ptr<T2> downCast() const {
 			static_assert(std::is_base_of<T,T2>::value,"Error: cannot convert");
 			return GC_ptr<T2>((T2*)t);
 		}
