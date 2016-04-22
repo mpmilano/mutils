@@ -60,6 +60,7 @@ struct abs_StructBuilder{
     template<typename FNameEnum>
     void incrementIntField(FNameEnum Name) {
         //auto pause = Profiler::pauseIfActive();
+        if (!isPaused())
         addField(Name,1 + std::stoi(getField(Name)));
     }
 
@@ -82,7 +83,7 @@ struct abs_StructBuilder{
     virtual ~abs_StructBuilder(){}
 };
 
-template<typename StructNameEnum, typename... StructType>
+template<bool enabled, typename StructNameEnum, typename... StructType>
 struct ObjectBuilder{
     static_assert(forall_nt(std::is_same<typename StructType::StructNameEnum, StructNameEnum>::value...), "Error: Name mismatch" );
 
@@ -313,4 +314,50 @@ struct ObjectBuilder{
     }
 
 };
+
+template<typename StructNameEnum, typename... StructType>
+struct ObjectBuilder<false,StructNameEnum,StructType...>{
+    template<typename... Args>
+    ObjectBuilder(Args...){}
+
+    struct DisabledObject : public abs_StructBuilder{
+
+        DisabledObject():abs_StructBuilder("shade"){}
+
+        void resume(std::unique_ptr<abs_StructBuilder> &){
+        }
+
+        void pause(std::unique_ptr<abs_StructBuilder> &){
+        }
+
+        bool isPaused() const {
+            return true;
+        }
+
+        virtual abs_StructBuilder& addField_impl(int, std::string) {
+            return *this;
+        }
+        virtual const std::string& getField_impl(int i) {
+            static const std::string s{""};
+            return s;
+        }
+
+        virtual std::string single() const {
+            return "";
+        }
+
+        virtual std::string print_data() const {
+            return "";
+        }
+    };
+
+    template<StructNameEnum>
+    std::unique_ptr<abs_StructBuilder> beginStruct(){
+        return std::unique_ptr<abs_StructBuilder>(new DisabledObject());
+    }
+
+    static constexpr auto declarations(){ return "";}
+
+};
+
 }
