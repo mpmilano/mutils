@@ -12,6 +12,25 @@ namespace mutils{
 		constexpr Frequency operator*(const Frequency& fr) const{
 			return Frequency{fr.hertz * hertz};
 		}
+                constexpr bool operator<(const Frequency &rhs) const{
+                    return hertz < rhs.hertz;
+                }
+                constexpr bool operator>(const Frequency &rhs) const{
+                    return hertz > rhs.hertz;
+                }
+                constexpr bool operator==(const Frequency &rhs) const{
+                    return hertz == rhs.hertz;
+                }
+                constexpr bool operator!=(const Frequency &rhs) const{
+                    return hertz != rhs.hertz;
+                }
+                constexpr bool operator<=(const Frequency &rhs) const{
+                    return hertz <= rhs.hertz;
+                }
+                constexpr bool operator>=(const Frequency &rhs) const{
+                    return hertz >= rhs.hertz;
+                }
+
 	};
 	
 	constexpr Frequency operator"" _Hz(unsigned long long hz)
