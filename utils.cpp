@@ -86,6 +86,10 @@ namespace mutils{
 		char ch; //to temporarily store the '.'
 		s >> a >> ch >> b >> ch >> c >> ch >> d;
 		iparr[0] = a, iparr[1] = b, iparr[2] = c, iparr[3] = d;
+		if (string_of_ip(ret) != static_addr){
+			std::cerr << string_of_ip(ret) << std::endl;
+			std::cerr << static_addr << std::endl;
+		}
 		assert(string_of_ip(ret) == static_addr);
 		return ret;
 	}
