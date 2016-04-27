@@ -70,6 +70,7 @@ struct abs_StructBuilder{
         //auto pause = Profiler::pauseIfActive();
         std::stringstream ss;
         ss << data;
+		assert(this);
         return addField_impl(static_cast<int>(Name),ss.str());
     }
     virtual std::string single() const = 0;
