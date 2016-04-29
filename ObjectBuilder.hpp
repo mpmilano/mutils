@@ -60,7 +60,7 @@ struct abs_StructBuilder{
     template<typename FNameEnum>
     void incrementIntField(FNameEnum Name) {
         //auto pause = Profiler::pauseIfActive();
-        if (!isPaused())
+        //if (!isPaused())
         addField(Name,1 + std::stoi(getField(Name)));
     }
 
@@ -77,9 +77,9 @@ struct abs_StructBuilder{
 
     virtual std::string print_data() const = 0;
 
-    virtual void pause(std::unique_ptr<abs_StructBuilder> &ptr) = 0;
-    virtual void resume(std::unique_ptr<abs_StructBuilder> &ptr) = 0;
-    virtual bool isPaused() const = 0;
+    //virtual void pause(std::unique_ptr<abs_StructBuilder> &ptr) = 0;
+    //virtual void resume(std::unique_ptr<abs_StructBuilder> &ptr) = 0;
+    //virtual bool isPaused() const = 0;
 
     virtual ~abs_StructBuilder(){}
 };
@@ -267,7 +267,7 @@ struct ObjectBuilder{
         std::string single() const {
             //auto pause = Profiler::pauseIfActive();
             std::stringstream out;
-            out << "[]() -> " << this->name << " {" << this->name << " ret {" << print_data() << "}; return ret; }()";
+			out << "(" << this->name << "{" << print_data() << "})";
             return out.str();
         }
 

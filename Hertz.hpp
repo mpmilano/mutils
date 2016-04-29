@@ -6,31 +6,37 @@ namespace mutils{
 	struct Frequency
 	{
 		void Print() const;
-		const unsigned long long hertz;
+		unsigned long long hertz;
 		constexpr Frequency operator+(const Frequency& fr) const{
 			return Frequency{fr.hertz + hertz};
 		}
 		constexpr Frequency operator*(const Frequency& fr) const{
 			return Frequency{fr.hertz * hertz};
 		}
-                constexpr bool operator<(const Frequency &rhs) const{
-                    return hertz < rhs.hertz;
-                }
-                constexpr bool operator>(const Frequency &rhs) const{
-                    return hertz > rhs.hertz;
-                }
-                constexpr bool operator==(const Frequency &rhs) const{
-                    return hertz == rhs.hertz;
-                }
-                constexpr bool operator!=(const Frequency &rhs) const{
-                    return hertz != rhs.hertz;
-                }
-                constexpr bool operator<=(const Frequency &rhs) const{
-                    return hertz <= rhs.hertz;
-                }
-                constexpr bool operator>=(const Frequency &rhs) const{
-                    return hertz >= rhs.hertz;
-                }
+		constexpr bool operator<(const Frequency &rhs) const{
+			return hertz < rhs.hertz;
+		}
+		constexpr bool operator>(const Frequency &rhs) const{
+			return hertz > rhs.hertz;
+		}
+		constexpr bool operator==(const Frequency &rhs) const{
+			return hertz == rhs.hertz;
+		}
+		constexpr bool operator!=(const Frequency &rhs) const{
+			return hertz != rhs.hertz;
+		}
+		constexpr bool operator<=(const Frequency &rhs) const{
+			return hertz <= rhs.hertz;
+		}
+		constexpr bool operator>=(const Frequency &rhs) const{
+			return hertz >= rhs.hertz;
+		}
+		Frequency operator=(const Frequency &rhs){
+			return Frequency{hertz = rhs.hertz};
+		}
+		Frequency operator+=(const Frequency &rhs){
+			return (*this) = (*this) + rhs;
+		}
 
 	};
 	
