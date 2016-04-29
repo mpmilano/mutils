@@ -267,7 +267,7 @@ struct ObjectBuilder{
         std::string single() const {
             //auto pause = Profiler::pauseIfActive();
             std::stringstream out;
-			out << "(" << this->name << "{" << print_data() << "})";
+            out << "[]() -> " << this->name << " {" << this->name << " ret {" << print_data() << "}; return ret; }()";
             return out.str();
         }
 
