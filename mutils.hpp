@@ -51,9 +51,20 @@ namespace mutils{
 		return *((typename std::decay<T>::type*) nullptr);
 	}
 
+	template<typename> struct is_shared_ptr_str : std::false_type{};
+	template<typename T> struct is_shared_ptr_str<std::shared_ptr<T> > : std::true_type{};
+	template<typename T> using is_shared_ptr = is_shared_ptr_str<T>;
+
+	template<typename> struct is_unique_ptr_str : std::false_type{};
+	template<typename T> struct is_unique_ptr_str<std::unique_ptr<T> > : std::true_type{};
+	template<typename T> using is_unique_ptr = is_unique_ptr_str<T>;
+
+	
 	template<typename T>
 	constexpr typename std::enable_if<!std::is_pointer<T>::value,typename std::decay<T>::type*>::type
 	mke_p(){
+		static_assert(!is_shared_ptr<std::decay_t<T> >::value,"Error: mke_p on shared pointer");
+		static_assert(!is_unique_ptr<std::decay_t<T> >::value,"Error: mke_p on unique pointer");
 		return (typename std::decay<T>::type*) nullptr;
 	}
 
