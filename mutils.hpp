@@ -59,6 +59,11 @@ namespace mutils{
 	template<typename T> struct is_unique_ptr_str<std::unique_ptr<T> > : std::true_type{};
 	template<typename T> using is_unique_ptr = is_unique_ptr_str<T>;
 
+	template<typename>
+	struct is_set : std::false_type {};
+
+	template<typename T>
+	struct is_set<std::set<T> > : std::true_type {};
 	
 	template<typename T>
 	constexpr typename std::enable_if<!std::is_pointer<T>::value,typename std::decay<T>::type*>::type
