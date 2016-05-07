@@ -64,7 +64,21 @@ namespace mutils{
 
 	template<typename T>
 	struct is_set<std::set<T> > : std::true_type {};
-	
+
+	template<typename T>
+	struct extract_type_if_set_str {
+		static_assert(!is_set<T>::value,"internal error");
+		using type = T;
+	};	
+
+	template<typename T>
+	struct extract_type_if_set_str<std::set<T> > {
+		using type = T;
+	};
+
+	template<typename T>
+	using extract_type_if_set = typename extract_type_if_set_str<T>::type;
+
 	template<typename T>
 	constexpr typename std::enable_if<!std::is_pointer<T>::value,typename std::decay<T>::type*>::type
 	mke_p(){
