@@ -2,8 +2,8 @@
 #include <sstream>
 #include <cassert>
 #include <type_traits>
+#include <memory>
 #include "args-finder.hpp"
-#include "GC_pointer.hpp"
 
 namespace mutils{
 
@@ -33,22 +33,22 @@ namespace mutils{
 	template<typename key, typename value>
 	struct _mapnode {
 	private:
-		GC_ptr<const _mapnode_super<key,value> > this_p;
+		std::shared_ptr<const _mapnode_super<key,value> > this_p;
 	public:
 
-		_mapnode(const GC_manager&, const _mapnode &l,const key &k,value v,const _mapnode &r, const int height);
-		_mapnode(const GC_ptr<const _mapnode_empty<key,value> > &);
-		_mapnode(const GC_ptr<const _mapnode_nonempty<key,value> > &);
-		_mapnode(const GC_manager&);
+		_mapnode(const _mapnode &l,const key &k,value v,const _mapnode &r, const int height);
+		_mapnode(const std::shared_ptr<const _mapnode_empty<key,value> > &);
+		_mapnode(const std::shared_ptr<const _mapnode_nonempty<key,value> > &);
+		_mapnode();
 		_mapnode(const _mapnode& mn) = default;
 
 		/*
 		template<typename Ret>
-		Ret match(const std::function<Ret (GC_ptr<const _mapnode_empty<key,value> >)> &f,
-		const std::function<Ret (GC_ptr<const _mapnode_nonempty<key,value> >)> &g) const;//*/
+		Ret match(const std::function<Ret (std::shared_ptr<const _mapnode_empty<key,value> >)> &f,
+		const std::function<Ret (std::shared_ptr<const _mapnode_nonempty<key,value> >)> &g) const;//*/
 
-		GC_ptr<const _mapnode_empty<key,value> > as_empty() const;
-		GC_ptr<const _mapnode_nonempty<key,value> > as_nonempty() const;
+		std::shared_ptr<const _mapnode_empty<key,value> > as_empty() const;
+		std::shared_ptr<const _mapnode_nonempty<key,value> > as_nonempty() const;
 		
 
 		bool operator==(const _mapnode &other) const {
@@ -83,8 +83,11 @@ namespace mutils{
 				const auto &other = *((_mapnode_nonempty const * const )&_other);
 				if (k < other.k) return true;
 				else if (k == other.k){
-					if(v < other.v) return true;
-					else if (v == other.v){
+					using fakev_t = std::array<char,sizeof(v)/sizeof(char)>;
+					fakev_t *fake_v = (fakev_t*) &v;
+					fakev_t *fake_vother = (fakev_t*) &other.v;
+					if(fake_v < fake_vother) return true;
+					else if (fake_v == fake_vother){
 						if (l < other.l) return true;
 						else if (l == other.l && r < other.r) return true;
 					}
@@ -95,47 +98,35 @@ namespace mutils{
 	};
 
 	template<typename key, typename value>
-	GC_ptr<const _mapnode_empty<key,value> > _mapnode<key,value>::as_empty() const {
+	std::shared_ptr<const _mapnode_empty<key,value> > _mapnode<key,value>::as_empty() const {
 		if (height() == 0)
-			return this_p.template downCast<_mapnode_empty<key,value> >();
-		else return GC_ptr<_mapnode_empty<key,value> >{};
+			return std::static_pointer_cast<const _mapnode_empty<key,value> >(this_p);
+		else return std::shared_ptr<_mapnode_empty<key,value> >{nullptr};
 	}
 
 	template<typename key, typename value>
-	GC_ptr<const _mapnode_nonempty<key,value> > _mapnode<key,value>::as_nonempty() const {
+	std::shared_ptr<const _mapnode_nonempty<key,value> > _mapnode<key,value>::as_nonempty() const {
 		if (height() > 0)
-			return this_p.template downCast<_mapnode_nonempty<key,value> >();
-		else return GC_ptr<_mapnode_nonempty<key,value> >{};
-	}
-
-	
-/*
-	template<typename key, typename value>
-	template<typename Ret>
-	Ret _mapnode<key,value>::match(const std::function<Ret (GC_ptr<const _mapnode_empty<key,value> >)> &f,
-									  const std::function<Ret (GC_ptr<const _mapnode_nonempty<key,value> >)> &g) const {
-		if (height() == 0)
-			return f(this_p.template downCast<_mapnode_empty<key,value> >());
-		else 
-			return g(this_p.template downCast<_mapnode_nonempty<key,value> >());
-			}//*/
+			return std::static_pointer_cast<const _mapnode_nonempty<key,value> >(this_p);
+		else return std::shared_ptr<_mapnode_nonempty<key,value> >{nullptr};
+	}	
 
 	template<typename key, typename value>
-	_mapnode<key,value>::_mapnode(const GC_ptr<const _mapnode_empty<key,value> > &p)
+	_mapnode<key,value>::_mapnode(const std::shared_ptr<const _mapnode_empty<key,value> > &p)
 		:this_p{p} {}
 
 	template<typename key, typename value>
-	_mapnode<key,value>::_mapnode(const GC_ptr<const _mapnode_nonempty<key,value> > &p)
+	_mapnode<key,value>::_mapnode(const std::shared_ptr<const _mapnode_nonempty<key,value> > &p)
 		:this_p{p} {}
 
 
 	template<typename key, typename value>
-	_mapnode<key,value>::_mapnode(const GC_manager& gc)
-		:this_p{gc.template make<_mapnode_empty<key,value> >()} {}
+	_mapnode<key,value>::_mapnode()
+		:this_p{std::make_shared<_mapnode_empty<key,value> >()} {}
 
 	template<typename key, typename value>
-	_mapnode<key,value>::_mapnode(const GC_manager& gc, const _mapnode<key,value> &l,const key& k,value v,const _mapnode<key,value> &r, const int height)
-		:this_p(gc.template make<_mapnode_nonempty<key,value> >(l,k,v,r,height)){}
+	_mapnode<key,value>::_mapnode(const _mapnode<key,value> &l,const key& k,value v,const _mapnode<key,value> &r, const int height)
+		:this_p(std::make_shared<_mapnode_nonempty<key,value> >(l,k,v,r,height)){}
 
 	template<typename key, typename value>
 	std::ostream& operator<<(std::ostream& os, const _mapnode<key,value>& _mn){
@@ -152,17 +143,17 @@ namespace mutils{
 		using empty = _mapnode_empty<Key,Value>;
 		using nonempty = _mapnode_nonempty<Key,Value>;
 		
-		static auto create(const GC_manager&gc, const mapnode& l, const key& x, value d, const mapnode& r){
+		static auto create(const mapnode& l, const key& x, value d, const mapnode& r){
 			int hl = l.height();
 			int hr = r.height();
-			return mapnode{gc,l,x,d,r, hl >= hr ? hl + 1 : hr + 1};
+			return mapnode{l,x,d,r, hl >= hr ? hl + 1 : hr + 1};
 		}
 
-		static mapnode singleton(const GC_manager& gc, const key &x, const value& d){
-			return mapnode{gc,mapnode{gc},x,d,mapnode{gc},1};
+		static mapnode singleton(const key &x, const value& d){
+			return mapnode{mapnode{},x,d,mapnode{},1};
 		}
 
-		static auto balance(const GC_manager& gc, const mapnode &l, const key &x, value d, const mapnode &r){
+		static auto balance(const mapnode &l, const key &x, value d, const mapnode &r){
 			
 			int hl = l.height();
 			int hr = r.height();
@@ -170,14 +161,14 @@ namespace mutils{
 				if (l.as_empty()) assert(false && "invalid arg!");
 				else if (auto l2 = l.as_nonempty()){
 					if (l2->l.height() >= l2->r.height()){
-						return create(gc,l2->l,l2->k,l2->v,create(gc,l2->r,x,d,r));
+						return create(l2->l,l2->k,l2->v,create(l2->r,x,d,r));
 					}
 					else {
 						if (l2->r.as_empty()){
 							assert(false && "invalid arg!");
 						}
 						else if (auto lr = l2->r.as_nonempty()){
-							return create (gc,create (gc,l2->l, l2->k, l2->v, lr->l),lr->k,lr->v,create (gc,lr->r, x, d, r));
+							return create (create (l2->l, l2->k, l2->v, lr->l),lr->k,lr->v,create (lr->r, x, d, r));
 						}
 					}
 				}
@@ -188,25 +179,25 @@ namespace mutils{
 					if (r2.as_empty()) assert(false && "invalid arg!");
 					else if (auto r = r2.as_nonempty()){
 						if (r->r.height() >= r->l.height()) 
-							return create (gc,create (gc,l, x, d, r->l),
+							return create (create (l, x, d, r->l),
 										   r->k, r->v,r->r);
 						else {
 							if (r->l.as_empty()) assert(false && "invalid arg!");
 							else if (auto rl = r->l.as_nonempty()) {
-								return create (gc,create (gc,l, x, d, rl->l), rl->k, rl->v, create(gc,rl->r, r->k, r->v, r->r));
+								return create (create (l, x, d, rl->l), rl->k, rl->v, create(rl->r, r->k, r->v, r->r));
 							}
 						}
 					}
 				}
 			}
 			else {
-				return mapnode{gc,l,x,d,r, (hl >= hr ? hl + 1 : hr + 1)};
+				return mapnode{l,x,d,r, (hl >= hr ? hl + 1 : hr + 1)};
 			}
 			assert(false);
 		}
 
 		static bool is_empty(const mapnode& mn){
-			return mn.as_empty();
+			return mn.as_empty().get();
 		}
 
 		static int size(const mapnode& mn){
@@ -219,29 +210,29 @@ namespace mutils{
 			return (l < r ? -1 : (l == r ? 0 : 1));
 		}
 
-		static mapnode mk_empty(const GC_manager& gc){
-			static const mapnode ret{gc};
+		static mapnode mk_empty(){
+			static const mapnode ret{};
 			return ret;
 		}
 		
-		static mapnode add(const GC_manager& gc,
+		static mapnode add(
 						   const key& x, value data, const mapnode& __mn){
 			if (auto m = __mn.as_nonempty()){
 								//std::cerr << std::endl;
 					const int c = compare(x,m->k);
 					if (c == 0) {
 						//std::cerr << "replacing " << __mn << "with " << x << ":" << data;
-						return (m->v == data ? __mn : mapnode{gc,m->l,x,data,m->r,m->height});
+						return mapnode{m->l,x,data,m->r,m->height};
 					}
 					else if (c < 0) {
 						assert(x < m->k);
-						const auto ll = add (gc,x,data,m->l);
+						const auto ll = add (x,data,m->l);
 						if  (m->l == ll) {
 							//std::cerr << m->l << " and " << ll << " are the same" << std::endl;
 							return __mn;
 						}
 						else {
-							auto bal = balance(gc,ll, m->k, m->v, m->r);/*
+							auto bal = balance(ll, m->k, m->v, m->r);/*
 							std::cerr << "left: " << ll <<  "this: " << "(" << m->k << ":" << m->v << ")" << "right: " << m->r <<std::endl;
 							std::cerr << "pre-balance: " << create(ll,m->k,m->v,m->r) << std::endl;
 							std::cerr << "post-balance: " << bal << std::endl; //*/
@@ -251,13 +242,13 @@ namespace mutils{
 					else if (c > 0){
 						assert(compare(x,m->k) == 1);
 						assert(x > m->k);
-						const auto rr = add (gc,x, data, m->r);
+						const auto rr = add (x, data, m->r);
 						if (m->r == rr) {
 							//std::cerr << m->r << " and " << rr << " are the same" << std::endl;
 							return __mn;
 						}
 						else {
-							auto bal = balance(gc,m->l,m->k,m->v,rr);/*
+							auto bal = balance(m->l,m->k,m->v,rr);/*
 							std::cerr << "left: " << m->l <<  "this: " << "(" << m->k << ":" << m->v << ")" << "right: " << rr << std::endl;
 							std::cerr << "pre-balance: " << create(m->l,m->k,m->v,rr) << std::endl;
 							std::cerr << "post-balance: " << bal << std::endl; //*/
@@ -265,7 +256,7 @@ namespace mutils{
 						}
 					}
 					else assert(false && "fire!!!");	
-			} else return mapnode{gc,__mn,x,data,__mn,1};
+			} else return mapnode{__mn,x,data,__mn,1};
 		}
 		
 		static value find (const key&x, const mapnode& __mn){
@@ -284,5 +275,4 @@ namespace mutils{
 			else assert(false);
 		}
 	};
-
 }
