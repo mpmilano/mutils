@@ -236,7 +236,7 @@ namespace mutils{
 
 
 
-	int gensym();
+	unsigned int gensym();
 
 	int get_thread_id();
 

@@ -12,10 +12,10 @@ namespace mutils{
 		return nullptr;
 	}
 
-	int gensym() {
+	unsigned int gensym() {
 		static std::mutex m;
 		std::unique_lock<std::mutex> lock{m};
-		static int counter = 0;
+		static unsigned  counter = 0;
 		assert(counter < (std::numeric_limits<int>::max() - 1));
 		return ++counter;
 	}
