@@ -3,7 +3,7 @@
 TARGET=libmutils.so
 
 CPPFLAGS=-fPIC -g --std=c++14 
-LDFLAGS= -lgc -shared -Wl,-rpath=$(shell pwd)/ --enable-new-dtags
+LDFLAGS= -shared -Wl,-rpath=$(shell pwd)/ --enable-new-dtags
 
 SOURCES = utils.cpp
 
