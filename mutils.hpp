@@ -355,6 +355,47 @@ namespace mutils{
 	unsigned int int_rand();
 
 	int decode_ip(const std::string&);
+
+	constexpr unsigned char int_from_ascii(char c){
+		switch(c){
+		case '0' : return 0;
+		case '1' : return 1;
+		case '2' : return 2;
+		case '3' : return 3;
+		case '4' : return 4;
+		case '5' : return 5;
+		case '6' : return 6;
+		case '7' : return 7;
+		case '8' : return 8;
+		case '9' : return 9;
+		default: return -1;
+		}
+	}
+
+	constexpr unsigned int decode_ip(char const * const v){
+		unsigned int ret{0};
+		unsigned int accum{0};
+		unsigned int multiplier = 1000;
+		for (auto i = 0; ; ++i){
+			if (v[i] == '.' || v[i] == 0){
+				accum /= multiplier;
+				accum <<= 8*3;
+				multiplier = 1000;
+				ret >>= 8;
+				ret += accum;
+				accum = 0;
+				if (v[i] == '.') continue;
+				else if (v[i] == 0) break;
+			}
+			multiplier /= 10;
+			accum += multiplier * int_from_ascii(v[i]);
+		}
+		return ret;
+	}
+
+	static_assert(decode_ip("0.0.0.0") == 0,"");
+	static_assert(decode_ip("1...") == 1,"");
+	static_assert(decode_ip("12.0.0.0") == 12,"");
 	
 	std::string string_of_ip(unsigned int i);
 	
