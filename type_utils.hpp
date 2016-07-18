@@ -45,7 +45,7 @@ namespace mutils{
 	template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
 
 	template<int index, typename EnumType, typename fold_fun, typename Accum>
-	std::enable_if_t<(index == static_cast<int>(EnumType::MAX)),Accum> enum_fold_helper(const fold_fun& ff, const Accum &accum){
+	std::enable_if_t<(index == static_cast<int>(EnumType::MAX)),Accum> enum_fold_helper(const fold_fun& , const Accum &accum){
 		return accum;
 	}
 

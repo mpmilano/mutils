@@ -256,7 +256,7 @@ struct ObjectBuilder{
                         : field_data.at(i));
             };
 
-            for (int i = 0; i < field_data.size() -1; ++i){
+            for (std::decay_t<decltype(field_data.size())> i = 0; i < field_data.size() -1; ++i){
                 out << data_str(i) << ", ";
             }
             auto last_entry = field_data.size() - 1;
@@ -338,7 +338,7 @@ struct ObjectBuilder<false,StructNameEnum,StructType...>{
         virtual abs_StructBuilder& addField_impl(int, std::string) {
             return *this;
         }
-        virtual const std::string& getField_impl(int i) {
+        virtual const std::string& getField_impl(int) {
             static const std::string s{""};
             return s;
         }

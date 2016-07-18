@@ -204,7 +204,7 @@ namespace mutils{
 	}
 
 	template<typename T, typename Tpl>
-	auto& filter_tpl(const T &t, std::false_type*, const Tpl &tpl){
+	auto& filter_tpl(const T &, std::false_type*, const Tpl &tpl){
 		return tpl;
 	}
 

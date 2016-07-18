@@ -87,7 +87,7 @@ namespace mutils{
 		s >> a >> ch >> b >> ch >> c >> ch >> d;
 		iparr[0] = a, iparr[1] = b, iparr[2] = c, iparr[3] = d;
 		{
-			auto dbg = decode_ip(static_addr.c_str());
+			int dbg = decode_ip(static_addr.c_str());
 			if (ret != dbg){
 				std::cerr << string_of_ip(ret) << std::endl;
 				std::cerr << static_addr << std::endl;
