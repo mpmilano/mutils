@@ -218,4 +218,25 @@ namespace mutils{
 	
 	template<typename Arg, typename Accum>
 	using Pointerize = Cons_t<Arg*,Accum>;
+
+	template<typename... > struct TupleList;
+
+	template<typename fst, typename... rst>
+	struct TupleList<fst,rst...> {
+		using Rest = TupleList<rst...>;
+		using First = fst;
+		First first;
+		Rest rest;
+		TupleList(First first, rst... rest):first(first),rest(rest...){}
+	};
+
+	template<> struct TupleList<> {
+		using Rest = void*;
+		using First = void*;
+		void* rest = nullptr;
+		void* first = nullptr;
+	};
+
+	
 }
+

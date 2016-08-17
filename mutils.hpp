@@ -109,7 +109,18 @@ namespace mutils{
 		static type build(){ return type();}
 	};
 
+	template<typename Obj, typename Tuple, int ...S>
+	auto __make_unique_tupleargs(const Tuple &t, seq<S...>) {
+		return std::make_unique<Obj>(std::get<S>(t)...);
+	}
 
+
+	template<typename Obj, typename Tuple>
+	auto make_unique_tupleargs(const Tuple &t) {
+		return __make_unique_tupleargs<Obj>(t,gens<std::tuple_size<Tuple>::value >::build() );
+	}
+
+	
 	template<typename F, typename Tuple, int ...S>
 	auto __callFunc(const F& f, const Tuple &t, seq<S...>) {
 		return f(std::get<S>(t)...);
