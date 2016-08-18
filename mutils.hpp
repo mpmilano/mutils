@@ -22,6 +22,7 @@
 #endif
 #include <memory>
 #include <string>
+#include <list>
 #include <cstdlib>
 #include "AtScopeEnd.hpp"
 
@@ -432,7 +433,7 @@ namespace mutils{
 		ReassignableReference(T& t):t(&t){}
 	};
 
-	std::vector<std::string> split(const std::string &s, char c, std::size_t pos = 0){
+	std::list<std::string> split(const std::string &s, char c, std::size_t pos = 0){
 		auto index = s.find(c,pos);
 		auto ret = split(s,c,index+1);
 		ret.push_front(s.substr(pos,index));
