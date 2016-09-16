@@ -76,6 +76,32 @@ namespace mutils{
 		return fold_(vec,convert(f),acc);
 	}
 
+		template<int ind, int stop, typename Acc, typename F, typename... Args>
+	std::enable_if_t<ind == stop,Acc>
+	constexpr fold_recr(const std::tuple<Args...> &, const F &, const Acc &acc){
+		return acc;
+	}
+
+	template<int ind, int stop, typename Acc, typename F, typename... Args, restrict(ind < stop)>
+	constexpr auto fold_recr(std::tuple<Args...> &vec, const F &f, const Acc &acc){
+		return fold_recr<ind+1,stop>(vec,f,f(std::get<ind>(vec),acc));
+	}
+		
+		template<typename Acc, typename F, typename... Args>
+		constexpr auto fold_(std::tuple<Args...> &vec, const F &f, const Acc & acc){
+			return fold_recr<0,sizeof...(Args)>(vec,f,acc);
+		}
+	
+	template<typename Acc, typename F, typename Tuple, restrict(!std::is_function<F>::value)>
+	constexpr auto fold(Tuple &vec, const F &f, const Acc & acc){
+		return fold_(vec,f,acc);
+	}
+
+	template<typename Acc, typename Ret, typename Tuple, typename... Args>
+	auto constexpr fold(Tuple &vec, Ret (*f)(Args...), const Acc & acc){
+		return fold_(vec,convert(f),acc);
+	}
+
 	template<typename Tuple, typename F>
 	auto foreach(const Tuple &vec, const F &f){
 		if (std::tuple_size<Tuple>::value == 0) return true;
