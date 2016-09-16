@@ -78,7 +78,7 @@ namespace mutils{
 
 		template<int ind, int stop, typename Acc, typename F, typename... Args>
 	std::enable_if_t<ind == stop,Acc>
-	constexpr fold_recr(const std::tuple<Args...> &, const F &, const Acc &acc){
+	constexpr fold_recr(std::tuple<Args...> &, const F &, const Acc &acc){
 		return acc;
 	}
 
