@@ -150,31 +150,22 @@ constexpr bool exists(const T& _a, Args... b){
 }
 
 
-template<typename... Args>
-static constexpr auto forall (Args...){
-	static_assert(sizeof...(Args) == 0, "got template recursion wrong");
+constexpr auto forall (){
 	return true;
 }
 
 template<typename... Args>
-static constexpr auto forall(bool a, Args... b){
-	return (sizeof...(Args) == 0 ? a 
-		: (a ? forall(b...) 
-		   : false));
+constexpr auto forall(bool a, Args... b){
+	return a && forall(b...);
 }
 
-
-template<typename... Args>
-constexpr auto forall_nt (Args...){
-	static_assert(sizeof...(Args) == 0, "got template recursion wrong");
+constexpr auto forall_nt (){
 	return true;
 }
 
 template<typename... Args>
 constexpr auto forall_nt (bool a, Args... b){
-	return (sizeof...(Args) == 0 ? a 
-		: (a ? forall(b...) 
-		   : false));
+	return a && forall_nt(b...);
 }
 
 
