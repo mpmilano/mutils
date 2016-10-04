@@ -130,6 +130,13 @@ namespace mutils{
 		return counter;
 	}
 
+	void copy_into(std::size_t how_many,std::size_t const * const sizes,void ** bufs, char* src){
+		for (std::size_t i = 0; i < how_many; ++i){
+			memcpy(bufs[i],src,sizes[i]);
+			src += sizes[i];
+		}
+	}
+
 }
 	//Frequency stuff
 	
