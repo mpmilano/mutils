@@ -149,3 +149,21 @@ namespace mutils{
 	}
 
 }
+
+namespace std{
+	std::ostream & operator<<(std::ostream &os, const std::vector<char>& so){
+		os << "<[";
+		for (auto &e : so){
+			os << +e << ",";
+		}
+		return os << "]>";
+	}
+
+	std::ostream & operator<<(std::ostream &os, const std::vector<unsigned char>& so){
+		os << "<[";
+		for (auto &e : so){
+			os << +e << ",";
+		}
+		return os << "]>";
+	}
+}

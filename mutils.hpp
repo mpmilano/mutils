@@ -439,3 +439,26 @@ namespace mutils{
 	
 }
 
+
+namespace std{
+		template<std::size_t size, typename T>
+	std::ostream & operator<<(std::ostream &os, const std::array<T,size>& so){
+		os << "[";
+		for (auto &e : so){
+			os << e << ",";
+		}
+		return os << "]";
+	}
+
+	std::ostream & operator<<(std::ostream &os, const std::vector<char>& so);
+	std::ostream & operator<<(std::ostream &os, const std::vector<unsigned char>& so);
+	
+	template<typename T>
+	std::ostream & operator<<(std::ostream &os, const std::vector<T>& so){
+		os << "<[";
+		for (auto &e : so){
+			os << e << ",";
+		}
+		return os << "]>";
+	}
+}
