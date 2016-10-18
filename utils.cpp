@@ -1,6 +1,7 @@
 #include "mutils.hpp"
 #include <arpa/inet.h>
 #include "Hertz.hpp"
+#include "string.h"
 
 namespace mutils{
 
