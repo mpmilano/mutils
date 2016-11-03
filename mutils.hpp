@@ -436,7 +436,14 @@ namespace mutils{
 	std::list<std::string> split(const std::string &s, char c, std::size_t pos = 0);
 
 	void copy_into(std::size_t how_many,std::size_t const * const sizes,void ** bufs, char* src);
-	
+
+	constexpr auto total_size(std::size_t how_many, std::size_t const * const sizes){
+		std::size_t accum{0};
+		for (unsigned int i = 0; i < how_many; ++i){
+			accum += sizes[i];
+		}
+		return accum;
+	}
 }
 
 
