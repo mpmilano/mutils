@@ -28,6 +28,8 @@
 
 namespace mutils{
 
+	/*
+	  //Disabled: untested, unused
 	template<typename T, std::size_t size1, std::size_t size2>
 	auto prefix_array(const std::array<T,size1>& t,
 					  const std::array<T,size2> &arr,
@@ -45,7 +47,7 @@ namespace mutils{
 			++j;
 		}
 		return ret;
-	}
+		}//*/
 
 	template<typename T>
 	constexpr T mke(){

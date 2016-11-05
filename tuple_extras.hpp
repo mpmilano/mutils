@@ -43,7 +43,7 @@ namespace mutils{
 
 		constexpr int size1 = std::tuple_size<Tuple1>::value;
 		constexpr int size2 = std::tuple_size<Tuple2>::value;
-		assert(size1 == size2);
+		static_assert(size1 == size2,"Error: tuple size does not match");
 	
 		return tuple_2fold_impl<0,size1,Acc,F,Tuple1,Tuple2>
 			(f,t1,t2,acc,

@@ -55,6 +55,11 @@ namespace mutils{
 			/* could not open directory */
 			perror ("");
 			assert(false && "Could not open dir.");
+			struct io_exn : public std::exception{
+				const char* what() const noexcept{
+					return "io exception on read_dir: could not open directory";
+				}
+			}; throw io_exn();
 		}
 
 		return ret;
@@ -97,6 +102,7 @@ namespace mutils{
 		char ch; //to temporarily store the '.'
 		s >> a >> ch >> b >> ch >> c >> ch >> d;
 		iparr[0] = a, iparr[1] = b, iparr[2] = c, iparr[3] = d;
+#ifndef NDEBUG
 		{
 			int dbg = decode_ip(static_addr.c_str());
 			if (ret != dbg){
@@ -110,6 +116,7 @@ namespace mutils{
 			std::cerr << static_addr << std::endl;
 		}
 		assert(string_of_ip(ret) == static_addr);
+#endif
 		return ret;
 	}
 

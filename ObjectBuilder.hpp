@@ -191,6 +191,7 @@ struct ObjectBuilder{
             }
 
             void pause(std::unique_ptr<abs_StructBuilder> &mine){
+				(void)mine;
                 assert(mine.get() == this);
             }
             bool isPaused() const {
@@ -220,6 +221,7 @@ struct ObjectBuilder{
         ObjectBuilder &parent;
 
         void resume(std::unique_ptr<abs_StructBuilder> &resume_to){
+			(void)resume_to;
             assert(resume_to.get() == this);
         }
 

@@ -7,6 +7,8 @@
 
 namespace mutils{
 
+	struct FunctionalMapError{};
+
 	template<typename key, typename value>
 	struct _mapnode_super {
 		const int height;
@@ -158,7 +160,10 @@ namespace mutils{
 			int hl = l.height();
 			int hr = r.height();
 			if (hl > hr + 2){
-				if (l.as_empty()) assert(false && "invalid arg!");
+				if (l.as_empty()) {
+					assert(false && "invalid arg!");
+					throw FunctionalMapError{};
+				}
 				else if (auto l2 = l.as_nonempty()){
 					if (l2->l.height() >= l2->r.height()){
 						return create(l2->l,l2->k,l2->v,create(l2->r,x,d,r));
@@ -166,6 +171,7 @@ namespace mutils{
 					else {
 						if (l2->r.as_empty()){
 							assert(false && "invalid arg!");
+							throw FunctionalMapError{};
 						}
 						else if (auto lr = l2->r.as_nonempty()){
 							return create (create (l2->l, l2->k, l2->v, lr->l),lr->k,lr->v,create (lr->r, x, d, r));
@@ -176,13 +182,19 @@ namespace mutils{
 			else if (hr > hl + 2){
 				auto r2 = r;
 				{
-					if (r2.as_empty()) assert(false && "invalid arg!");
+					if (r2.as_empty()) {
+						assert(false && "invalid arg!");
+						throw FunctionalMapError{};
+					}
 					else if (auto r = r2.as_nonempty()){
 						if (r->r.height() >= r->l.height()) 
 							return create (create (l, x, d, r->l),
 										   r->k, r->v,r->r);
 						else {
-							if (r->l.as_empty()) assert(false && "invalid arg!");
+							if (r->l.as_empty()) {
+								assert(false && "invalid arg!");
+								throw FunctionalMapError{};
+							}
 							else if (auto rl = r->l.as_nonempty()) {
 								return create (create (l, x, d, rl->l), rl->k, rl->v, create(rl->r, r->k, r->v, r->r));
 							}
@@ -194,6 +206,7 @@ namespace mutils{
 				return mapnode{l,x,d,r, (hl >= hr ? hl + 1 : hr + 1)};
 			}
 			assert(false);
+			throw FunctionalMapError{};
 		}
 
 		static bool is_empty(const mapnode& mn){
@@ -255,7 +268,11 @@ namespace mutils{
 							return bal;
 						}
 					}
-					else assert(false && "fire!!!");	
+					else {
+						assert(false && "fire!!!");
+						struct dead_code{};
+						throw dead_code{};
+					}
 			} else return mapnode{__mn,x,data,__mn,1};
 		}
 		
@@ -263,7 +280,10 @@ namespace mutils{
 			if (auto m = __mn.as_nonempty()) {
 				const auto c = compare(x,m->k);
 				return (c == 0 ? m->v : find(x, (c < 0 ? m->l : m->r)));
-			} else assert(false && "not found!");
+			} else {
+				assert(false && "not found!");
+				throw FunctionalMapError{};
+			}
 		}
 
 		static bool mem(const key&x, const mapnode &__mn){
@@ -272,7 +292,11 @@ namespace mutils{
 				const auto c = compare(x,m->k);
 				return ( c == 0 || mem(x,(c < 0 ? m->l : m->r )));
 			}
-			else assert(false);
+			else {
+				assert(false);
+				struct dead_code{};
+				throw dead_code{};
+			}
 		}
 	};
 }

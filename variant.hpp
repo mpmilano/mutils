@@ -14,6 +14,7 @@ public:
 	template<std::size_t i>
 	std::enable_if_t<i == 0, A&> get(std::size_t index){
 		assert(index == i);
+		(void)index;
 		return *a;
 	}
 };
@@ -33,12 +34,14 @@ public:
 	template<std::size_t i>
 	std::enable_if_t<i == 0, A&> get(int used_entry){
 		assert(used_entry == i);
+		(void)used_entry
 		return *a;
 	}
 	
 	template<std::size_t i>
 	std::enable_if_t<i == 1, B&> get(int used_entry){
 		assert(used_entry == i);
+		(void)used_entry;
 		return *b;
 	}
 
