@@ -368,8 +368,6 @@ namespace mutils{
 
 	unsigned int int_rand();
 
-	int decode_ip(const std::string&);
-
 	constexpr unsigned char int_from_ascii(char c){
 		switch(c){
 		case '0' : return 0;
