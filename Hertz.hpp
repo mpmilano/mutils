@@ -10,8 +10,8 @@ namespace mutils{
 		constexpr Frequency operator+(const Frequency& fr) const{
 			return Frequency{fr.hertz + hertz};
 		}
-		constexpr Frequency operator*(const Frequency& fr) const{
-			return Frequency{fr.hertz * hertz};
+		constexpr unsigned long long operator/(const Frequency& fr) const{
+			return hertz / fr.hertz;
 		}
 		constexpr Frequency operator*(const unsigned long long& factor) const{
 			return Frequency{factor * hertz};
