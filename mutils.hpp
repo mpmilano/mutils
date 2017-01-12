@@ -145,6 +145,27 @@ namespace mutils{
 		return __callFunc(convert(f),t,p);
 	}
 
+	template<typename F, typename Tuple, int ...S>
+	auto __callFunc(const F& f, Tuple &t, seq<S...>) {
+		return f(std::get<S>(t)...);
+	}
+
+
+	template<typename F, typename Tuple, restrict(!std::is_function<F>::value)>
+	auto callFunc(const F &f, Tuple &t) {
+		return __callFunc(f,t,gens<std::tuple_size<Tuple>::value >::build() );
+	}
+
+	template<typename Ret, typename Tuple, typename... Args>
+	auto callFunc(Ret (*f) (Args...), Tuple &t) {
+		return __callFunc(f,t,gens<std::tuple_size<Tuple>::value >::build() );
+	}
+
+	template<typename Ret, typename Tuple, typename Pack, typename... Args>
+	Ret callFunc(Ret (*f) (Args...), Tuple &t, Pack p) {
+		return __callFunc(convert(f),t,p);
+	}
+
 	template<typename Ret, typename Tuple, int ...S>
 	Ret callConstructor(const Tuple &t, seq<S...>) {
 		return Ret(std::get<S>(t)...);
