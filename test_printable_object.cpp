@@ -42,4 +42,9 @@ int main(){
 			fwrite(bytes,size,1,fd);
 		}};
 	post_object(Fun::write,o,fd);
+	std::stringstream ss;
+	ss << o;
+	std::string str = ss.str();
+	auto o2 = from_string<decltype(o)>(nullptr,str.c_str(),str.length());
+	std::cout << *o2 << std::endl;
 }

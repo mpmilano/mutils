@@ -3,6 +3,8 @@
 #include <sstream>
 #include <cxxabi.h>
 #include <unistd.h>
+#include "type_utils.hpp"
+#include "SerializationSupport.hpp"
 
 namespace mutils{
 
@@ -11,9 +13,12 @@ namespace mutils{
 		template<char... str> struct Name {
 			constexpr Name() = default;
 			static const constexpr char name [] = {str...,0};
+			static const constexpr decltype(sizeof...(str)) name_length = sizeof...(str);
 		};
 		template<char... str>
 		const char Name<str...>::name[];
+		template<char... str>
+		const decltype(sizeof...(str)) Name<str...>::name_length;
 
 		template<typename> struct is_name : public std::false_type{};
 		template<char... str> struct is_name<Name<str...> > : public std::true_type{};
@@ -61,6 +66,7 @@ namespace mutils{
 	struct PrintableObject : public Name, public Fields...{
 		static_assert(printable_object::is_name<Name>::value,"error: supply struct Name<...>");
 		using Name::name;
+		using Name::name_length;
 		constexpr PrintableObject() = default;
 		template<typename FieldName>
 			constexpr auto& getField(FieldName* n){
@@ -149,11 +155,83 @@ namespace mutils{
 
 	template<typename F, typename PrintableObject, typename... Args>
 	std::enable_if_t<is_printable_object<PrintableObject>::value>
-	post_object(const F& f, const PrintableObject& br, Args&&... args){
+	post_object_as_string(const F& f, const PrintableObject& br, Args&&... args){
 		using namespace std;
 		stringstream ss;
 		ss << br;
 		auto&& str = ss.str();
 		f(forward<Args>(args)...,str.c_str(),str.size());
+	}
+	
+	template<typename F, typename PrintableObject, typename... Args>
+	std::enable_if_t<is_printable_object<PrintableObject>::value>
+	post_object(const F& f, const PrintableObject& br, Args&&... args){
+		return post_object_as_string<F,PrintableObject,Args...>(f,br,std::forward<Args>(args)...);
+	}
+
+	template<typename Name, typename... Fields>
+	std::size_t to_bytes(const PrintableObject<Name,Fields...>& br, char *v){
+		std::size_t index{0};
+		return post_object(post_to_buffer(index,v),br);
+	}
+
+	namespace printable_object{
+
+		template<typename PO>
+		void set_fields(DeserializationManager*, PO&, char const * const, int){
+		}
+		
+		template<typename PO, typename Field1, typename... Fields>
+		void set_fields(DeserializationManager* d, PO& po, char const * const str, int in_between_space){
+			Field1& f1 = po;
+			int start = 0;
+			int end = 0;
+			for (int i = 0; ; ++i){
+				if (str[i] == '{') {
+					start = i+1;
+					break;
+				}
+			}
+			{
+				int stack_depth = 0;
+				for (int i = start; ; ++i){
+					if (str[i] == '{') ++stack_depth;
+					if (str[i] == '}'){
+						if (stack_depth) --stack_depth;
+						else {
+							end = i;
+							break;
+						}
+					}
+				}
+			}
+
+			auto size = end - start;
+			auto field_str = str + start;
+			f1.value = *from_string<typename Field1::type>(d,field_str,size);
+			set_fields<PO,Fields...>(d,po,str + end + 1 + in_between_space,in_between_space);
+		}
+		
+		template<typename Name, typename... Fields>
+		std::unique_ptr<PrintableObject<Name,Fields...> >	PrintableObject_from_string(DeserializationManager* d,
+																																								 PrintableObject<Name,Fields...> const * const,
+																																								 char const * const v){
+			using namespace std;
+			assert(strncmp(v,Name::name,Name::name_length) == 0);
+			auto ret = std::make_unique<PrintableObject<Name,Fields...> >();
+			set_fields<PrintableObject<Name,Fields...>, Fields...>(d,*ret,v + Name::name_length+1,2);
+			return ret;
+		}
+	}
+
+	template<typename T>
+	std::unique_ptr<type_check<is_printable_object,T> >	from_string(DeserializationManager* d, char const * const v, std::size_t){
+		constexpr T const * const t{nullptr};
+		return PrintableObject_from_string(d,t,v);
+	}
+
+	template<typename T>
+	std::unique_ptr<type_check<is_printable_object,T> >	from_bytes(DeserializationManager* d, char const * const v){
+		return from_string<T>(d,v);
 	}
 }
