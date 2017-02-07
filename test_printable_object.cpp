@@ -8,21 +8,19 @@
 using namespace mutils;
 using namespace printable_object;
 
-	using Foo = Name<'f','o','o'>;
-	constexpr Foo const * const foo{nullptr};
-	using IntFoo = Field<Foo,int>;
-
-	using MyObj = Name<'M','y','O','b','j'>;
-
-	using Bar = Name<'b','a','r'>;
-	constexpr Bar const*const bar{nullptr};
-	using DoubleBar = Field<Bar,double>;
+using Foo = MUTILS_NAME("foo");
+using IntFoo = Field<Foo,int>;
+using MyObj = MUTILS_NAME("MyObj");
+using Bar = MUTILS_NAME("Bar");
+using DoubleBar = Field<Bar,double>;
+using Baz = MUTILS_NAME("Baz");
+using StringBaz = Field<Baz,std::string>;
 
 constexpr auto _is_it_constexpr(){
 	
 	PrintableObject<MyObj,IntFoo,DoubleBar> o;
 
-	return o.getField(bar) = 3;
+	return o.getField(Bar::p) = 3;
 }
 
 constexpr bool is_it_constexpr(){
@@ -31,9 +29,10 @@ constexpr bool is_it_constexpr(){
 
 int main(){
 	static_assert(is_it_constexpr(),"");
-	PrintableObject<MyObj,IntFoo,DoubleBar> o;
-	o.getField(foo) = 4;
-	o.getField(bar) = 12.4;
+	PrintableObject<MyObj,IntFoo,DoubleBar,StringBaz> o;
+	o.getField(Foo::p) = 4;
+	o.getField(Bar::p) = 12.4;
+	o.getField(Baz::p) = "hi";
 	std::cout << o << std::endl;
 	auto fd = fopen("/tmp/test","w+");
 	assert(fd);

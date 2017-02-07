@@ -5,24 +5,12 @@
 #include <unistd.h>
 #include "type_utils.hpp"
 #include "SerializationSupport.hpp"
+#include "Name.hpp"
 
 namespace mutils{
 
 	namespace printable_object{
-
-		template<char... str> struct Name {
-			constexpr Name() = default;
-			static const constexpr char name [] = {str...,0};
-			static const constexpr decltype(sizeof...(str)) name_length = sizeof...(str);
-		};
-		template<char... str>
-		const char Name<str...>::name[];
-		template<char... str>
-		const decltype(sizeof...(str)) Name<str...>::name_length;
-
-		template<typename> struct is_name : public std::false_type{};
-		template<char... str> struct is_name<Name<str...> > : public std::true_type{};
-
+		
 		template<typename, typename> struct Field;
 		
 		template<typename Type, char... str>
@@ -31,7 +19,10 @@ namespace mutils{
 			using Name = Name<str...>;
 			using type = Type;
 			type value;
+			static constexpr Field const * const p{nullptr};
 		};
+		template<typename Type, char... str>
+		constexpr Field<Name<str...>, Type> const * const Field<Name<str...>, Type>::p;
 
 		template<typename> struct FieldRef;
 		
@@ -64,7 +55,7 @@ namespace mutils{
 
 	template<typename Name, typename... Fields>
 	struct PrintableObject : public Name, public Fields...{
-		static_assert(printable_object::is_name<Name>::value,"error: supply struct Name<...>");
+		static_assert(is_name<Name>::value,"error: supply struct Name<...>");
 		using Name::name;
 		using Name::name_length;
 		constexpr PrintableObject() = default;
