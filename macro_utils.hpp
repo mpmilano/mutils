@@ -54,7 +54,6 @@
 #define whendebug(x...)
 #endif
 
-
 #define MACRO_GET_1(str, i) \
 	(sizeof(str) > (i) ? str[(i)] : 0)
 
@@ -75,5 +74,21 @@
 		MACRO_GET_16(str, i+16), \
 		MACRO_GET_16(str, i+32), \
 		MACRO_GET_16(str, i+48)
+
+#define MACRO_GET_128(str, i) \
+	MACRO_GET_64(str, i+0),  \
+		MACRO_GET_64(str, i+64)
+
+#define MACRO_GET_256(str, i) \
+	MACRO_GET_64(str, i+0),  \
+		MACRO_GET_64(str, i+64), \
+		MACRO_GET_64(str, i+128), \
+		MACRO_GET_64(str, i+192)
+
+#define MACRO_GET_1024(str, i) \
+	MACRO_GET_256(str, i+0),  \
+		MACRO_GET_256(str, i+256), \
+		MACRO_GET_256(str, i+512), \
+		MACRO_GET_256(str, i+768)
 
 #define MACRO_GET_STR(str) MACRO_GET_64(str, 0), 0 //guard for longer strings
