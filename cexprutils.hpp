@@ -1,13 +1,13 @@
 #pragma once
 
 namespace mutils{
-		struct CTString {
+		struct CexprString {
 			char str[1024]{0};
 			operator std::string(){
 				return std::string{str};
 			}
 
-			constexpr CTString operator=(const CTString& other){
+			constexpr CexprString operator=(const CexprString& other){
 				for (int i = 0; i < 1024; ++i){
 					str[i] = other.str[i];
 					if (other.str[i] == 0) break;
@@ -27,8 +27,8 @@ namespace mutils{
 			return digits;
 		}
 		
-		constexpr CTString to_ctstring(unsigned int number){
-			CTString ret;
+		constexpr CexprString to_cexprstring(unsigned int number){
+			CexprString ret;
 			//0 won't enter the loop
 			ret.str[0] = '0';
 			ret.str[1] = 0;
@@ -48,15 +48,15 @@ namespace mutils{
 			return ret;
 		}
 
-	static_assert(to_ctstring(5).str[0] == '5',"Testing to_ststring");
-	static_assert(to_ctstring(53).str[1] == '3',"Testing to_ststring");
-	static_assert(to_ctstring(521).str[1] == '2',"Testing to_ststring");
-	static_assert(to_ctstring(1235).str[2] == '3',"Testing to_ststring");
-	static_assert(to_ctstring(849274).str[4] == '7',"Testing to_ststring");
-	static_assert(to_ctstring(2948672).str[3] == '8',"Testing to_ststring");
+	static_assert(to_cexprstring(5).str[0] == '5',"Testing to_ststring");
+	static_assert(to_cexprstring(53).str[1] == '3',"Testing to_ststring");
+	static_assert(to_cexprstring(521).str[1] == '2',"Testing to_ststring");
+	static_assert(to_cexprstring(1235).str[2] == '3',"Testing to_ststring");
+	static_assert(to_cexprstring(849274).str[4] == '7',"Testing to_ststring");
+	static_assert(to_cexprstring(2948672).str[3] == '8',"Testing to_ststring");
 		
-		static constexpr CTString operator+(const CTString &ths, const CTString& other){
-			CTString newstr;
+		static constexpr CexprString operator+(const CexprString &ths, const CexprString& other){
+			CexprString newstr;
 			int index = 0;
 			for (;ths.str[index] != 0;++index) {
 				newstr.str[index] = ths.str[index];
@@ -68,8 +68,8 @@ namespace mutils{
 			return newstr;
 		}
 		
-		static constexpr CTString operator+(const CTString &ths, char const * const other){
-				CTString newstr;
+		static constexpr CexprString operator+(const CexprString &ths, char const * const other){
+				CexprString newstr;
 				int index = 0;
 				for (;ths.str[index] != 0;++index) {
 					newstr.str[index] = ths.str[index];
@@ -81,15 +81,15 @@ namespace mutils{
 				return newstr;
 			}
 		
-		static constexpr CTString operator+(const CTString &ths, int _other){
-			return ths + to_ctstring(_other);
+		static constexpr CexprString operator+(const CexprString &ths, int _other){
+			return ths + to_cexprstring(_other);
 		}
 
-	static_assert((CTString{} + "=").str[0] == '=',"");
-	static_assert((CTString{} + "=").str[1] == 0,"");
-	static_assert((to_ctstring(5) + "=").str[0] == '5',"");
-	static_assert((to_ctstring(5) + "=").str[1] == '=',"");
-	static_assert((to_ctstring(5) + "=").str[2] == 0,"");
-	static_assert((CTString{} + 3 +"=").str[1] == '=' ,"");
+	static_assert((CexprString{} + "=").str[0] == '=',"");
+	static_assert((CexprString{} + "=").str[1] == 0,"");
+	static_assert((to_cexprstring(5) + "=").str[0] == '5',"");
+	static_assert((to_cexprstring(5) + "=").str[1] == '=',"");
+	static_assert((to_cexprstring(5) + "=").str[2] == 0,"");
+	static_assert((CexprString{} + 3 +"=").str[1] == '=' ,"");
 
 }
