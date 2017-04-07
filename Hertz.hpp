@@ -10,12 +10,18 @@ namespace mutils{
 		constexpr Frequency operator+(const Frequency& fr) const{
 			return Frequency{fr.hertz + hertz};
 		}
-		constexpr unsigned long long operator/(const Frequency& fr) const{
-			return hertz / fr.hertz;
-		}
+
 		constexpr Frequency operator*(const unsigned long long& factor) const{
 			return Frequency{factor * hertz};
 		}
+
+		template<typename Rep, typename Period>
+		constexpr std::size_t operator*(std::chrono::duration<Rep,Period> time) const{
+			using namespace std;
+			using namespace chrono;
+			return duration_cast<seconds>(time).count()*hertz;
+		}
+		
 		constexpr bool operator<(const Frequency &rhs) const{
 			return hertz < rhs.hertz;
 		}
