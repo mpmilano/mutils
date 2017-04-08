@@ -48,6 +48,8 @@ namespace mutils{
 		}
 
 	};
+
+	
 	
 	constexpr Frequency operator"" _Hz(unsigned long long hz)
 	{
@@ -67,6 +69,7 @@ namespace mutils{
 	}
 	
 	std::ostream& operator<<(std::ostream& os, const Frequency &freq);
+	std::istream& operator>>(std::istream& os, Frequency &freq);
 
 }
 

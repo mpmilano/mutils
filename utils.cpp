@@ -156,6 +156,12 @@ namespace mutils{
 		return os << freq.hertz << "_Hz";
 	}
 
+	std::istream& operator>>(std::istream& os, Frequency &freq){
+		char suffix[] = {0,0,0,0};
+		return os >> freq.hertz >> suffix[0] >> suffix[1] >> suffix[2];
+		assert(std::string(suffix) == "_Hz");
+	}
+
 }
 
 namespace std{
