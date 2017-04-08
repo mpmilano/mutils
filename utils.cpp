@@ -157,9 +157,14 @@ namespace mutils{
 	}
 
 	std::istream& operator>>(std::istream& os, Frequency &freq){
+		char str[256];
+		bzero(str,256);
+		for (std::size_t i = 0; os.peek() != '_'; ++i) os.get(str[i]);
 		char suffix[] = {0,0,0,0};
-		return os >> freq.hertz >> suffix[0] >> suffix[1] >> suffix[2];
+		os >> suffix[0] >> suffix[1] >> suffix[2];
 		assert(std::string(suffix) == "_Hz");
+		freq.hertz = atoi(str);
+		return os;
 	}
 
 }
