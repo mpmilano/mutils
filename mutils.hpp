@@ -465,6 +465,19 @@ namespace mutils{
 		}
 		return accum;
 	}
+
+	struct comma_is_space : std::ctype<char> {
+		//from http://stackoverflow.com/questions/7302996/changing-the-delimiter-for-cin-c
+		comma_is_space();
+		static typename std::ctype_base::mask const* get_table();
+	};
+	
+	struct comma_space {
+		constexpr comma_space() = default;
+	};
+	std::ostream& operator<<(std::ostream& o, const mutils::comma_space&);
+
+	std::istream& operator>>(std::istream& o, const mutils::comma_space&);
 }
 
 

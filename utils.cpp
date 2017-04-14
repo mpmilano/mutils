@@ -167,6 +167,36 @@ namespace mutils{
 		return os;
 	}
 
+	comma_is_space::comma_is_space() : std::ctype<char>(get_table()) {}
+
+	typename std::ctype_base::mask const* comma_is_space::get_table()
+	{
+		static mask rc[table_size];
+		rc[(int)','] = std::ctype_base::space;
+		rc[(int)'\n'] = std::ctype_base::space;
+		return &rc[0];
+	}
+
+	std::ostream& operator<<(std::ostream& o, const mutils::comma_space&){
+		return o << ", ";
+	}
+
+	std::istream& operator>>(std::istream& o, const mutils::comma_space&){
+		if (o.peek() == ',')
+		{
+			char cma;
+			o.get(cma);
+			assert(cma == ',');
+		}
+		if (o.peek() == ' ')
+		{
+			char spc;
+			o.get(spc);
+			assert(spc == ' ');
+		}
+		return o;
+	}
+	
 }
 
 namespace std{
