@@ -200,6 +200,19 @@ namespace mutils{
 }
 
 namespace std{
+  
+    	std::ostream& operator<<(std::ostream& o, const std::chrono::seconds& p){
+		return o << p.count() << "s";
+	}
+
+      	std::ostream& operator<<(std::ostream& o, const std::chrono::microseconds& p){
+		return o << p.count() << "us";
+	}
+
+  std::ostream& operator<<(std::ostream& o, const std::chrono::milliseconds& p){
+    return o << p.count() << "ms";
+  }
+  
 	std::ostream & operator<<(std::ostream &os, const std::vector<char>& so){
 		os << "<[";
 		for (auto &e : so){

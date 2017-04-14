@@ -502,4 +502,35 @@ namespace std{
 		}
 		return os << "]>";
 	}
+
+  std::ostream& operator<<(std::ostream& o, const std::chrono::seconds& p);
+  std::ostream& operator<<(std::ostream& o, const std::chrono::microseconds& p);
+  std::ostream& operator<<(std::ostream& o, const std::chrono::milliseconds& p);
+  
+  template<typename U, typename V>
+  std::istream& operator>>(std::istream& i, std::chrono::duration<U,V>& p){
+    using namespace std;
+    using namespace chrono;
+    using p_t = std::chrono::duration<U,V>;
+    char suffix[] = {0,0,0,0};
+    size_t number;
+    i >> number >> suffix[0];
+    if (suffix[0] == 's'){
+      p = duration_cast<p_t>(seconds{number});
+    } else {
+      i >> suffix[1];
+      if (suffix[0] == 'm' && suffix[1] == 'i'){
+	i >> suffix[2];
+	assert(string{suffix} == "min");
+	p = duration_cast<p_t>(minutes{number});
+      }
+      if (suffix[0] == 'm' && suffix[1] == 's'){
+	p = duration_cast<p_t>(milliseconds{number});
+      }
+      if (suffix[0] == 'u' && suffix[1] == 's'){
+	p = duration_cast<p_t>(microseconds{number});
+      }
+    }
+    return i;
+  }
 }
