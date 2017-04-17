@@ -512,9 +512,17 @@ namespace std{
     using namespace std;
     using namespace chrono;
     using p_t = std::chrono::duration<U,V>;
+		int sign = 1;
+		if (i.peek() == '-'){
+			char n;
+			i.get(n);
+			assert(n == '-');
+			sign = -1;
+		}
     char suffix[] = {0,0,0,0};
-    size_t number;
+    long long number;
     i >> number >> suffix[0];
+		number *= sign;
     if (suffix[0] == 's'){
       p = duration_cast<p_t>(seconds{number});
     } else {

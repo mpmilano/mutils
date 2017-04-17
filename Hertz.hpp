@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <chrono>
 
 namespace mutils{
 
@@ -13,6 +14,10 @@ namespace mutils{
 
 		constexpr Frequency operator*(const unsigned long long& factor) const{
 			return Frequency{factor * hertz};
+		}
+
+		constexpr Frequency operator/(const unsigned long long& factor) const{
+			return Frequency{hertz / factor};
 		}
 
 		template<typename Rep, typename Period>
