@@ -25,8 +25,6 @@ contained()
   return exists<std::is_same<Cand, List>::value...>();
 }
 
-struct mismatch;
-
 template <typename S>
 constexpr auto*
 find_subtype_f()
@@ -76,11 +74,6 @@ count_matches()
 {
   return (0 + ... + b);
 }
-
-struct mismatch
-{
-  constexpr mismatch() = default;
-};
 
 template <typename... T>
 constexpr bool

@@ -54,7 +54,15 @@ namespace mutils{
 		return enum_fold_helper<0,EnumType,fold_fun,ret_t>(ff, accum);
 	}
 
-	template<typename T> struct identity_struct {using type = T; };
+	struct mismatch
+	{
+		constexpr mismatch() = default;
+		using is_mismatch = std::integral_constant<bool,true>;
+	};
+	
+	template<typename T> struct identity_struct {
+		using type = T;
+	};
 	template<template<typename> class T> struct identity_struct1 {template<typename U> using type = T<U>; };
 
 }
