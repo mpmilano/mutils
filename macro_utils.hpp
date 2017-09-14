@@ -91,4 +91,4 @@
 		MACRO_GET_256(str, i+512), \
 		MACRO_GET_256(str, i+768)
 
-#define MACRO_GET_STR(str) MACRO_GET_64(str, 0), 0 //guard for longer strings
+#define MACRO_GET_STR(str) MACRO_GET_128(str, 0), 0 //guard for longer strings
