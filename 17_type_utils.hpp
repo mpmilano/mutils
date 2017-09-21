@@ -89,6 +89,13 @@ contains_single_match()
   return count_matches<std::is_same<T, mismatch>::value...>() == (sizeof...(T)-1);
 }
 
+	template<typename... T>
+	constexpr auto _find_match(std::enable_if_t<sizeof...(T) == 0>* = nullptr)
+{
+	return mismatch{};
+}
+
+	
 template <typename K, typename... T>
 constexpr K*
 _find_match(std::enable_if_t<!std::is_same<K, mismatch>::value>* = nullptr)
@@ -100,6 +107,14 @@ _find_match(std::enable_if_t<!std::is_same<K, mismatch>::value>* = nullptr)
 template <typename K, typename... T>
 constexpr auto _find_match(std::enable_if_t<std::is_same<K, mismatch>::value>* = nullptr)
 {
+  return _find_match<T...>();
+}
+
+template <typename... T>
+constexpr auto find_match_if_exists()
+{
+	//at most one match
+	static_assert(count_matches<std::is_same<T, mismatch>::value...>() >= (sizeof...(T) - 1));
   return _find_match<T...>();
 }
 

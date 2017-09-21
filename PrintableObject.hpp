@@ -168,12 +168,12 @@ namespace mutils{
 
 	namespace printable_object{
 
-		template<typename PO>
-		void set_fields(DeserializationManager*, PO&, char const * const, int){
+		template<typename PO, typename... ctxs>
+		void set_fields(DeserializationManager<ctxs...>*, PO&, char const * const, int){
 		}
 		
-		template<typename PO, typename Field1, typename... Fields>
-		void set_fields(DeserializationManager* d, PO& po, char const * const str, int in_between_space){
+		template<typename PO, typename Field1, typename DSM, typename... Fields>
+		void set_fields(DSM* d, PO& po, char const * const str, int in_between_space){
 			Field1& f1 = po;
 			int start = 0;
 			int end = 0;
@@ -203,8 +203,8 @@ namespace mutils{
 			set_fields<PO,Fields...>(d,po,str + end + 1 + in_between_space,in_between_space);
 		}
 		
-		template<typename Name, typename... Fields>
-		std::unique_ptr<PrintableObject<Name,Fields...> >	PrintableObject_from_string(DeserializationManager* d,
+		template<typename Name, typename DSM, typename... Fields>
+		std::unique_ptr<PrintableObject<Name,Fields...> >	PrintableObject_from_string(DSM* d,
 																																								 PrintableObject<Name,Fields...> const * const,
 																																								 char const * const v){
 			using namespace std;
@@ -215,14 +215,14 @@ namespace mutils{
 		}
 	}
 
-	template<typename T>
-	std::unique_ptr<type_check<is_printable_object,T> >	from_string(DeserializationManager* d, char const * const v, std::size_t){
+	template<typename T, typename... ctxs>
+	std::unique_ptr<type_check<is_printable_object,T> >	from_string(DeserializationManager<ctxs...>* d, char const * const v, std::size_t){
 		constexpr T const * const t{nullptr};
 		return PrintableObject_from_string(d,t,v);
 	}
 
-	template<typename T>
-	std::unique_ptr<type_check<is_printable_object,T> >	from_bytes(DeserializationManager* d, char const * const v){
+	template<typename T, typename... ctxs>
+	std::unique_ptr<type_check<is_printable_object,T> >	from_bytes(DeserializationManager<ctxs...>* d, char const * const v){
 		return from_string<T>(d,v);
 	}
 }

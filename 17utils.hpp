@@ -114,5 +114,9 @@ struct string_of
   }
 };
 
+	template<typename> struct remove_ptr_str;
+	template<typename T> struct remove_ptr_str<T*>{using type = typename remove_ptr_str<T>::type;};
+	template<typename T> struct remove_ptr_str{using type = T;};
+	template<typename T> using remove_ptr = typename remove_ptr_str<T>::type;
 	
 }
