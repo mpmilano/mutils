@@ -145,6 +145,10 @@ namespace mutils{
 		}
 	}
 
+	void* hidden_identity(void* v){
+		return v;
+	}
+	
 }
 	//Frequency stuff
 	

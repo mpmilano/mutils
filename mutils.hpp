@@ -478,6 +478,8 @@ namespace mutils{
 	std::ostream& operator<<(std::ostream& o, const mutils::comma_space&);
 
 	std::istream& operator>>(std::istream& o, const mutils::comma_space&);
+
+	void* hidden_identity(void*);
 }
 
 
