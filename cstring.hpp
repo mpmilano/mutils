@@ -27,5 +27,16 @@ constexpr std::size_t str_len(const char *str) {
     ++index;
   return index;
 }
+template<std::size_t size_dst, std::size_t size_src>
+constexpr std::size_t str_cpy(fixed_str<size_dst> &dst,const fixed_cstr<size_src> &src){
+  static_assert(size_dst >= size_src, "Error: ouput string too small for input string size (str_cpy)");
+  for (auto i = 0u; i < size_dst; ++i){
+    if (i < size_src){
+      dst[i] = src[i];
+    }
+    else dst[i] = 0;
+  }
+  return size_src;
+}
 } // namespace cstring
 } // namespace mutils

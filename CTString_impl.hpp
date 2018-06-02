@@ -322,10 +322,20 @@ constexpr auto trim_ends_helper(String<str2...>)
 }
 }
 
+constexpr String<> trim_nulls(const String<>& r){
+  return r;
+}
+
+template<char c, char... str>
+constexpr auto trim_nulls(const String<c,str...>&){
+  if constexpr (c == 0) return String<>{};
+  else return String<c>::append(trim_nulls(String<str...>{}));
+}
+
 template <char... str>
 constexpr auto String<str...>::trim_ends()
 {
-  return CTString::trim_ends_helper(String{});
+  return CTString::trim_ends_helper(trim_nulls(String{}));
 }
 
 template <char... str>
