@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cassert>
 
 namespace mutils {
 namespace cstring {
@@ -14,19 +15,12 @@ constexpr std::size_t str_len(const char *str) {
 }
 template <std::size_t size_dst>
 constexpr std::size_t str_cpy(fixed_str<size_dst> &dst, const char* src) {
-
-  std::size_t size_src = size_dst-1; //speculative
-  bool set_size_src{false};
+  std::size_t size_src = str_len(src);
+  assert(size_dst >= size_src);
   auto i = 0u;
   for (; i < size_dst; ++i) {
-    if (i <= size_src && src[i] != 0) {
-      dst[i] = src[i];
-    } else{
-      dst[i] = 0;
-      if (!set_size_src) size_src = i;
-    }
+    dst[i] = (i < size_src ? src[i] : 0);
   }
-  assert(i >= size_src || src[i] == 0 && "Error: dst was not large enough");
   return size_src;
 }
 
@@ -97,8 +91,8 @@ constexpr void track_paren_level(std::size_t &paren_level, char c) {
       paren_level++;
     }
     else {
-      assert(cp.is_closed());
       assert(paren_level > 0);
+      assert(cp.is_closed());
       --paren_level;
     }
   }
@@ -210,8 +204,10 @@ constexpr std::size_t copy_within_parens(fixed_str<dst_size> &dst, const char* s
     char c = src[i];
     track_paren_level(paren_level, c);
     if (paren_level > 0) {
-      if (is_paren(c)) continue;
-      in_paren_group = true;
+      if (!in_paren_group) {
+        in_paren_group = true;
+        continue; //skip first paren
+      }
       dst[dst_index] = c;
       ++dst_index;
     }

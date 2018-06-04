@@ -6,37 +6,51 @@ namespace mutils { namespace cstring {
 constexpr bool copy_within_parens_test1(){
   char out[40] = {0};
   char out2[40] = {0};
-  copy_within_parens(out,"(copy only this)");
+  auto ret = copy_within_parens<40>(out,"(copy only this)");
   str_cpy(out2,"copy only this");
+  assert(str_len(out) == ret);
   return streq(out,out2);
 }
 constexpr bool copy_within_parens_test2(){
   char out[40] = {0};
   char out2[40] = {0};
-  copy_within_parens(out,"ad (copy only this)");
+  auto ret = copy_within_parens(out,"ad (copy only this)");
   str_cpy(out2,"copy only this");
+  assert(str_len(out) == ret);
   return streq(out,out2);
 }
 constexpr bool copy_within_parens_test3(){
   char out[40] = {0};
   char out2[40] = {0};
-  copy_within_parens(out,"(copy only this) asfae ");
+  auto ret = copy_within_parens(out,"(copy only this) asfae ");
   str_cpy(out2,"copy only this");
+  assert(str_len(out) == ret);
   return streq(out,out2);
 }
 
 constexpr bool copy_within_parens_test4(){
   char out[40] = {0};
   char out2[40] = {0};
-  copy_within_parens(out,"(copy only this) (asfae) ");
+  auto ret = copy_within_parens(out,"(copy only this) (asfae) ");
   str_cpy(out2,"copy only this");
+  assert(str_len(out) == ret);
   return streq(out,out2);
 }
 
-static_assert(copy_within_parens_test1(), "testing copy_within_parens");
-static_assert(copy_within_parens_test2(), "testing copy_within_parens");
-static_assert(copy_within_parens_test3(), "testing copy_within_parens");
-static_assert(copy_within_parens_test4(), "testing copy_within_parens");
+constexpr bool copy_within_parens_test5(){
+  char out[40] = {0};
+  char out2[40] = {0};
+  auto ret = copy_within_parens(out,"(copy only this (and this)) (asfae) ");
+  str_cpy(out2,"copy only this (and this)");
+  assert(str_len(out) == ret);
+  return streq(out,out2);
+}
+
+static_assert(copy_within_parens_test1(), "testing copy_within_parens1");
+static_assert(copy_within_parens_test2(), "testing copy_within_parens2");
+static_assert(copy_within_parens_test3(), "testing copy_within_parens3");
+static_assert(copy_within_parens_test4(), "testing copy_within_parens4");
+static_assert(copy_within_parens_test5(), "testing copy_within_parens5");
 static_assert(first_word_is("the", " the woods are wary"),"Testing first_word_is");
 static_assert(first_word_is("", " the woods are wary"),"Testing first_word_is");
 
