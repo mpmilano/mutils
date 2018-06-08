@@ -127,6 +127,8 @@ constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
   std::size_t sub_index = 0;
   std::size_t paren_level{0};
   for (char c : in) {
+    assert(sub_index < s);
+    assert(out_index < t);
     track_paren_level(paren_level,c);
     if (c == split && paren_level == 0) {
       out_index++;
@@ -138,6 +140,27 @@ constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
   }
   return out_index + 1;
 }
+
+template <std::size_t s>
+constexpr std::size_t single_split(char split, const fixed_cstr<s> &in,
+                                           fixed_str<s> (&out)[2]) {
+  std::size_t out_index = 0;
+  std::size_t sub_index = 0;
+  std::size_t paren_level{0};
+  for (char c : in) {
+    assert(sub_index < s);
+    track_paren_level(paren_level,c);
+    if (c == split && paren_level == 0 && out_index == 0) {
+      out_index++;
+      sub_index = 0;
+    } else {
+      out[out_index][sub_index] = c;
+      sub_index++;
+    }
+  }
+  return out_index + 1;
+}
+
 
 template <std::size_t size>
 constexpr bool contains_outside_parens(char target, const fixed_cstr<size> &src) {
@@ -218,9 +241,29 @@ constexpr std::size_t copy_within_parens(fixed_str<dst_size> &dst, const char* s
 
 template<std::size_t dst_size>
 constexpr std::size_t next_paren_group(fixed_str<dst_size> &dst, const char* src){
-  if (is_space(src[0])) return 1 + next_paren_group(dst,src + 1);
+  assert(str_len(src) > 1);
+  if (!paren_t{src[0]}.is_open()) return 1 + next_paren_group(dst,src + 1);
   assert(is_paren(src[0]));
   return 2 + copy_within_parens(dst,src); //include the parens in the returned size.
+}
+
+template<std::size_t dst_size>
+constexpr std::size_t trim(fixed_str<dst_size> &dst, const char* src){
+  const auto len = str_len(src);
+  auto new_size = len;
+  for (auto i = (len -1); is_space(src[i]); --i){
+    new_size = i;
+  }
+  auto final_size = 0u;
+  bool skipped_spaces = false;
+  for (auto i = 0u; i < new_size; ++i){
+    if (!is_space(src[i]) || skipped_spaces){
+      skipped_spaces = true;
+      dst[final_size] = src[i];
+      ++final_size;
+    }
+  }
+  return final_size;
 }
 
 } // namespace cstring
