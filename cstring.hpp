@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cassert>
+#include "17utils.hpp"
 
 namespace mutils {
 namespace cstring {
@@ -84,15 +85,15 @@ struct paren_t {
 
 constexpr bool is_paren(char c) { return paren_t{c}.is_paren(); }
 
-constexpr void track_paren_level(std::size_t &paren_level, char c) {
+constexpr void track_paren_level(std::size_t &paren_level, char c, bool reverse = false) {
   paren_t cp{c};
   if (cp.is_paren()) {
-    if (cp.is_open()){
+    if ((reverse ? cp.is_closed() : cp.is_open())){
       paren_level++;
     }
     else {
       assert(paren_level > 0);
-      assert(cp.is_closed());
+      assert((reverse ? cp.is_open() : cp.is_closed()));
       --paren_level;
     }
   }
@@ -142,7 +143,7 @@ constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
 }
 
 template <std::size_t s>
-constexpr std::size_t single_split(char split, const fixed_cstr<s> &in,
+constexpr std::size_t first_split(char split, const fixed_cstr<s> &in,
                                            fixed_str<s> (&out)[2]) {
   std::size_t out_index = 0;
   std::size_t sub_index = 0;
@@ -159,6 +160,85 @@ constexpr std::size_t single_split(char split, const fixed_cstr<s> &in,
     }
   }
   return out_index + 1;
+}
+
+template <std::size_t s>
+constexpr std::size_t last_split(char split, const fixed_cstr<s> &in,
+                                           fixed_str<s> (&out)[2]) {
+  fixed_str<s> tmp_buf;
+  auto split_point = 0u;
+  str_cpy(tmp_buf,in);
+  std::size_t paren_level{0};
+  for (auto i = s-1; i < s; --i) {
+    char c = in[i];
+    track_paren_level(paren_level,c,true);
+    if (c == split && paren_level == 0) {
+      split_point = i;
+      tmp_buf[i] = 0;
+      break;
+    }
+  }
+  str_cpy(out[0],tmp_buf);
+  assert((tmp_buf + split_point)[0] == 0);
+  str_cpy(out[1],tmp_buf + split_point + 1);
+  return split_point;
+}
+
+constexpr bool prefix_equal(const char* smaller, const char* larger){
+  char smaller_size = str_len(smaller);
+  char larger_size = str_len(larger);
+  assert(larger_size >= smaller_size);
+  for (auto i = 0u; smaller[i]!= 0; ++i){
+    if (smaller[i] != larger[i]) return false;
+  }
+  return true;
+}
+
+template <std::size_t s>
+constexpr std::size_t first_split(const char* split, const fixed_cstr<s> &in,
+                                           fixed_str<s> (&out)[2]) {
+  std::size_t out_index = 0;
+  std::size_t sub_index = 0;
+  std::size_t paren_level{0};
+  const auto prefix_len = str_len(split);
+  for (auto i = 0u; i < s; ++i) {
+    const char c = in[i];
+    assert(sub_index < s);
+    track_paren_level(paren_level,c);
+    if (prefix_equal(split,i + in) && paren_level == 0 && out_index == 0) {
+      out_index++;
+      sub_index = 0;
+      i+= prefix_len-1; //it'll also autoincrement
+    } else {
+      out[out_index][sub_index] = c;
+      sub_index++;
+    }
+  }
+  return out_index + 1;
+}
+
+template <std::size_t s>
+constexpr std::size_t last_split(const char* split, const fixed_cstr<s> &in,
+                                           fixed_str<s> (&out)[2]) {
+  fixed_str<s> tmp_buf = {0};
+  auto split_point = 0u;
+  str_cpy(tmp_buf,in);
+  std::size_t paren_level{0};
+  auto prefix_len = str_len(split);
+  const auto in_len = str_len(in);
+  for (auto i = in_len; i <= in_len; --i) {
+    char c = in[i];
+    track_paren_level(paren_level,c,true);
+    if (prefix_len <= str_len(i + in) && prefix_equal(split,i + in) && paren_level == 0) {
+      split_point = i;
+      tmp_buf[i] = 0;
+      break;
+    }
+  }
+  str_cpy(out[0],tmp_buf);
+  assert((tmp_buf + split_point)[0] == 0);
+  str_cpy(out[1],tmp_buf + split_point + prefix_len);
+  return split_point;
 }
 
 
@@ -264,6 +344,17 @@ constexpr std::size_t trim(fixed_str<dst_size> &dst, const char* src){
     }
   }
   return final_size;
+}
+
+constexpr int parse_int(const char* src){
+  const auto string_length = str_len(src);
+	int multiplier = exp(10, string_length - 1);
+  int accum = 0;
+  for (unsigned int i = 0; i < string_length; ++i) {
+    accum += toInt(src[i]) * multiplier;
+    multiplier /= 10;
+  }
+  return accum;
 }
 
 } // namespace cstring

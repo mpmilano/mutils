@@ -46,6 +46,19 @@ constexpr bool copy_within_parens_test5(){
   return streq(out,out2);
 }
 
+constexpr bool last_split_test(){
+  using outstr = char[128];
+  outstr outarr[2] = {{0}};
+  outstr in = {0};
+  str_cpy(in,"testing last split TOK wee TOK last split! TOK !!!");
+  auto ret = last_split("TOK",in,outarr);
+  auto correct_len = str_len("testing last split TOK wee TOK last split! ");
+  assert (ret == correct_len);
+  assert (streq(outarr[0],"testing last split TOK wee TOK last split! "));
+  assert (streq(outarr[1]," !!!"));
+  return true;
+}
+static_assert(last_split_test(),"testing last split");
 static_assert(copy_within_parens_test1(), "testing copy_within_parens1");
 static_assert(copy_within_parens_test2(), "testing copy_within_parens2");
 static_assert(copy_within_parens_test3(), "testing copy_within_parens3");
