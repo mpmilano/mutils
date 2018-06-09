@@ -142,51 +142,9 @@ constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
   return out_index + 1;
 }
 
-template <std::size_t s>
-constexpr std::size_t first_split(char split, const fixed_cstr<s> &in,
-                                           fixed_str<s> (&out)[2]) {
-  std::size_t out_index = 0;
-  std::size_t sub_index = 0;
-  std::size_t paren_level{0};
-  for (char c : in) {
-    assert(sub_index < s);
-    track_paren_level(paren_level,c);
-    if (c == split && paren_level == 0 && out_index == 0) {
-      out_index++;
-      sub_index = 0;
-    } else {
-      out[out_index][sub_index] = c;
-      sub_index++;
-    }
-  }
-  return out_index + 1;
-}
-
-template <std::size_t s>
-constexpr std::size_t last_split(char split, const fixed_cstr<s> &in,
-                                           fixed_str<s> (&out)[2]) {
-  fixed_str<s> tmp_buf;
-  auto split_point = 0u;
-  str_cpy(tmp_buf,in);
-  std::size_t paren_level{0};
-  for (auto i = s-1; i < s; --i) {
-    char c = in[i];
-    track_paren_level(paren_level,c,true);
-    if (c == split && paren_level == 0) {
-      split_point = i;
-      tmp_buf[i] = 0;
-      break;
-    }
-  }
-  str_cpy(out[0],tmp_buf);
-  assert((tmp_buf + split_point)[0] == 0);
-  str_cpy(out[1],tmp_buf + split_point + 1);
-  return split_point;
-}
-
 constexpr bool prefix_equal(const char* smaller, const char* larger){
-  char smaller_size = str_len(smaller);
-  char larger_size = str_len(larger);
+  auto smaller_size = str_len(smaller);
+  auto larger_size = str_len(larger);
   assert(larger_size >= smaller_size);
   for (auto i = 0u; smaller[i]!= 0; ++i){
     if (smaller[i] != larger[i]) return false;
@@ -205,7 +163,7 @@ constexpr std::size_t first_split(const char* split, const fixed_cstr<s> &in,
     const char c = in[i];
     assert(sub_index < s);
     track_paren_level(paren_level,c);
-    if (prefix_equal(split,i + in) && paren_level == 0 && out_index == 0) {
+    if (prefix_len <= str_len(i+in) && prefix_equal(split,i + in) && paren_level == 0 && out_index == 0) {
       out_index++;
       sub_index = 0;
       i+= prefix_len-1; //it'll also autoincrement
@@ -215,6 +173,13 @@ constexpr std::size_t first_split(const char* split, const fixed_cstr<s> &in,
     }
   }
   return out_index + 1;
+}
+
+template <std::size_t s>
+constexpr std::size_t first_split(char split, const fixed_cstr<s> &in,
+                                           fixed_str<s> (&out)[2]) {
+  char splitstr[2] = {split,0};
+  return first_split(splitstr,in,out);
 }
 
 template <std::size_t s>
@@ -239,6 +204,12 @@ constexpr std::size_t last_split(const char* split, const fixed_cstr<s> &in,
   assert((tmp_buf + split_point)[0] == 0);
   str_cpy(out[1],tmp_buf + split_point + prefix_len);
   return split_point;
+}
+
+template <std::size_t s>
+constexpr std::size_t last_split(char split, const fixed_cstr<s> &in, fixed_str<s> (&out)[2]){
+  char splitstr[2] = {split,0};
+  return last_split(splitstr,in,out);
 }
 
 
@@ -331,7 +302,7 @@ template<std::size_t dst_size>
 constexpr std::size_t trim(fixed_str<dst_size> &dst, const char* src){
   const auto len = str_len(src);
   auto new_size = len;
-  for (auto i = (len -1); is_space(src[i]); --i){
+  for (auto i = (len -1); is_space(src[i]) && i < (len-1); --i){
     new_size = i;
   }
   auto final_size = 0u;
