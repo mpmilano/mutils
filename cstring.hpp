@@ -318,7 +318,8 @@ template<std::size_t dst_size>
 constexpr std::size_t trim(fixed_str<dst_size> &dst, const char* src){
   const auto len = str_len(src);
   auto new_size = len;
-  for (auto i = (len -1); is_space(src[i]) && i < (len-1); --i){
+  assert (len > 0);
+  for (auto i = (len -1); i < (len) && is_space(src[i]); --i){
     new_size = i;
   }
   auto final_size = 0u;

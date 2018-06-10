@@ -82,6 +82,30 @@ constexpr bool remove_first_word_test(){
   assert(ret == str_len(" has many words"));
   return streq(out," has many words");
 }
+
+constexpr bool trim_test(){
+  {
+    char out[40] = {0};
+    trim(out,"this ");
+    assert(!contains(' ',out));
+    assert(streq(out,"this"));
+  }
+  {
+    char out[40] = {0};
+    trim(out," this");
+    assert(!contains(' ',out));
+    assert(streq(out,"this"));
+  }
+  {
+    char out[40] = {0};
+    trim (out,"  more complicated   ");
+    assert(contains(' ',out));
+    assert(streq(out,"more complicated"));
+  }
+  return true;
+}
+
+static_assert(trim_test(),"testing trim");
 static_assert(remove_first_word_test(), "testing remove_first_word");
 
 }}
