@@ -2,11 +2,12 @@
 #ifndef NOTEST
 #include "cstring.hpp"
 namespace mutils { namespace cstring {
-
+#ifndef NDEBUG
 constexpr bool copy_within_parens_test1(){
   char out[40] = {0};
   char out2[40] = {0};
   auto ret = copy_within_parens<40>(out,"(copy only this)");
+  (void) ret;
   str_cpy(out2,"copy only this");
   assert(str_len(out) == ret);
   return streq(out,out2);
@@ -15,6 +16,7 @@ constexpr bool copy_within_parens_test2(){
   char out[40] = {0};
   char out2[40] = {0};
   auto ret = copy_within_parens(out,"ad (copy only this)");
+  (void) ret;
   str_cpy(out2,"copy only this");
   assert(str_len(out) == ret);
   return streq(out,out2);
@@ -23,6 +25,7 @@ constexpr bool copy_within_parens_test3(){
   char out[40] = {0};
   char out2[40] = {0};
   auto ret = copy_within_parens(out,"(copy only this) asfae ");
+  (void) ret;
   str_cpy(out2,"copy only this");
   assert(str_len(out) == ret);
   return streq(out,out2);
@@ -32,6 +35,7 @@ constexpr bool copy_within_parens_test4(){
   char out[40] = {0};
   char out2[40] = {0};
   auto ret = copy_within_parens(out,"(copy only this) (asfae) ");
+  (void) ret;
   str_cpy(out2,"copy only this");
   assert(str_len(out) == ret);
   return streq(out,out2);
@@ -41,6 +45,7 @@ constexpr bool copy_within_parens_test5(){
   char out[40] = {0};
   char out2[40] = {0};
   auto ret = copy_within_parens(out,"(copy only this (and this)) (asfae) ");
+  (void) ret;
   str_cpy(out2,"copy only this (and this)");
   assert(str_len(out) == ret);
   return streq(out,out2);
@@ -113,6 +118,6 @@ constexpr bool trim_test(){
 
 static_assert(trim_test(),"testing trim");
 static_assert(remove_first_word_test(), "testing remove_first_word");
-
+#endif
 }}
 #endif

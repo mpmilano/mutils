@@ -144,9 +144,8 @@ constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
 
 constexpr bool prefix_equal(const char* smaller, const char* larger){
   auto smaller_size = str_len(smaller);
-  auto larger_size = str_len(larger);
-  assert(larger_size >= smaller_size);
-  for (auto i = 0u; smaller[i]!= 0; ++i){
+  assert(str_len(larger) >= smaller_size);
+  for (auto i = 0u; i < smaller_size && smaller[i]!= 0; ++i){
     if (smaller[i] != larger[i]) return false;
   }
   return true;
