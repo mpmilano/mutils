@@ -88,6 +88,13 @@ constexpr bool remove_first_word_test(){
   return streq(out," has many words");
 }
 
+constexpr bool test_contains_outside_parens(){
+  return true;
+}
+
+static_assert(contains_outside_parens("-","hndl2->a - 1"));
+static_assert(contains_outside_parens("- ","hndl2->a - 1"));
+
 constexpr bool trim_test(){
   {
     char out[40] = {0};
