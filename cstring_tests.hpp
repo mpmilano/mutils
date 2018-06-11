@@ -125,6 +125,9 @@ constexpr bool trim_test(){
 
 static_assert(trim_test(),"testing trim");
 static_assert(remove_first_word_test(), "testing remove_first_word");
+
+static_assert(contains_paren("(g->value)"));
+
 #endif
 }}
 #endif
