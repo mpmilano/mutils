@@ -250,13 +250,22 @@ constexpr bool contains_paren(const char* src) {
   return false;
 }
 
+constexpr bool contains_space(const char* src) {
+  const auto len = str_len(src);
+  for (auto i = 0u; i < len; ++i){
+    if (is_space(src[i])) return true;
+  }
+  return false;
+}
+
 template <std::size_t size1>
 constexpr bool first_word_is(const fixed_cstr<size1> &target, const char* src) {
     std::size_t target_index{0};
+    bool skipped_spaces = false;
     for (auto i = 0u; ;++i){
       char c = src[i];
       if (c == 0) return target[target_index] == 0;
-      if (c == ' ') continue;
+      if (c == ' ' && !skipped_spaces){skipped_spaces = true; continue;}
       else if (target[target_index] == 0) return true;
       else if (c != target[target_index]) return false;
       else ++target_index;
