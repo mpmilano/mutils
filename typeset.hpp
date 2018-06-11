@@ -147,8 +147,8 @@ std::ostream& operator<<(std::ostream& o, typeset<t...>)
     return nullptr;
   };
   o << "[";
-  auto ignore = { nullptr, nullptr, print(o,(t*)nullptr)... };
-	(void)ignore;
+  (print(o,(t*)nullptr),...);
+  (void) print;
   return o << "]";
 }
 
