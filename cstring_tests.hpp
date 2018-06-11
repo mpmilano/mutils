@@ -102,6 +102,12 @@ constexpr bool trim_test(){
     assert(contains(' ',out));
     assert(streq(out,"more complicated"));
   }
+  {
+    char out[40] = {0};
+    trim (out," ");
+    assert(!contains(' ',out));
+    assert(streq(out,""));
+  }
   return true;
 }
 
