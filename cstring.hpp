@@ -226,6 +226,16 @@ constexpr bool contains_outside_parens(char target, const fixed_cstr<size> &src)
 }
 
 template <std::size_t size>
+constexpr std::size_t pre_paren(fixed_str<size> &out, const char* in) {
+  const auto len = str_len(in);
+  auto i = 0u;
+  for (; i < len && !is_paren(in[i]); ++i){
+    out[i] = in[i];
+  }
+  return i;
+}
+
+template <std::size_t size>
 constexpr bool contains(char target, const fixed_cstr<size> &src) {
   for (char c : src) {
     if (c == target) return true;
