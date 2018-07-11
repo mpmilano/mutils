@@ -2,6 +2,8 @@
 #include <arpa/inet.h>
 #include "Hertz.hpp"
 #include <string.h>
+#include <cstdlib>
+#include <iostream>
 
 namespace mutils{
 
@@ -14,6 +16,9 @@ namespace mutils{
 		return ret;
 	}
 
+	void error_and_abort(char const* const c){
+		std::cerr << "Error: test \"" << c << "\" has failed" << std::endl; std::abort();
+	}
 
 	std::nullptr_t choose_non_np(std::nullptr_t, std::nullptr_t){
 		return nullptr;

@@ -51,9 +51,12 @@
 #ifndef NDEBUG
 #define whendebug(x...) x
 #define whenrelease(x...)
+#define assert_always(x...) assert(x)
 #else
 #define whendebug(x...)
 #define whenrelease(x...) x
+namespace mutils { void error_and_abort(char const * const); }
+#define assert_always(x...) if(!x){::mutils::error_and_abort(#x);}
 #endif
 
 #define MACRO_GET_1(str, i) \
