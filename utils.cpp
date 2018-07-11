@@ -16,7 +16,7 @@ namespace mutils{
 		return ret;
 	}
 
-	void error_and_abort(char const* const c){
+	void error_and_abort(char const* const c) {
 		std::cerr << "Error: test \"" << c << "\" has failed" << std::endl; std::abort();
 	}
 

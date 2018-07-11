@@ -55,7 +55,7 @@
 #else
 #define whendebug(x...)
 #define whenrelease(x...) x
-namespace mutils { void error_and_abort(char const * const); }
+namespace mutils { void error_and_abort(char const * const) __attribute__((noreturn)); }
 #define assert_always(x...) if(!x){::mutils::error_and_abort(#x);}
 #endif
 
