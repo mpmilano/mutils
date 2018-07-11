@@ -50,8 +50,10 @@
 
 #ifndef NDEBUG
 #define whendebug(x...) x
-#else 
+#define whenrelease(x...)
+#else
 #define whendebug(x...)
+#define whenrelease(x...) x
 #endif
 
 #define MACRO_GET_1(str, i) \
