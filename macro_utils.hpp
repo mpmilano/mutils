@@ -58,6 +58,11 @@
 namespace mutils { void error_and_abort(char const * const) __attribute__((noreturn)); }
 #define assert_always(x...) if(!(x)){::mutils::error_and_abort(#x);}
 #endif
+#ifndef NOLOG
+#define whenlog(x...) x
+#else
+#define whenlog(x...)
+#endif
 
 #define MACRO_GET_1(str, i) \
 	(sizeof(str) > (i) ? str[(i)] : 0)
