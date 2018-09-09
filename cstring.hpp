@@ -121,9 +121,10 @@ struct space_t{
 
 constexpr bool is_space(char c){return space_t{c}.is_space();}
 
-template <std::size_t s, std::size_t t>
+template <std::size_t s, std::size_t s2, std::size_t t>
 constexpr std::size_t split_outside_parens(char split, const fixed_cstr<s> &in,
-                                           fixed_str<s> (&out)[t]) {
+                                           fixed_str<s2> (&out)[t]) {
+  static_assert(s2 >= s); //there must be enough space to hold everything!
   std::size_t out_index = 0;
   std::size_t sub_index = 0;
   std::size_t paren_level{0};
@@ -151,9 +152,10 @@ constexpr bool prefix_equal(const char* smaller, const char* larger){
   return true;
 }
 
-template <std::size_t s>
+template <std::size_t s, std::size_t s2>
 constexpr std::size_t first_split(const char* split, const fixed_cstr<s> &in,
-                                           fixed_str<s> (&out)[2]) {
+                                           fixed_str<s2> (&out)[2]) {
+  static_assert(s2 >= s,"Error: out buf might be too small");
   std::size_t out_index = 0;
   std::size_t sub_index = 0;
   std::size_t paren_level{0};
@@ -174,9 +176,10 @@ constexpr std::size_t first_split(const char* split, const fixed_cstr<s> &in,
   return out_index + 1;
 }
 
-template <std::size_t s>
+template <std::size_t s, std::size_t s2>
 constexpr std::size_t first_split(char split, const fixed_cstr<s> &in,
-                                           fixed_str<s> (&out)[2]) {
+                                           fixed_str<s2> (&out)[2]) {
+  static_assert(s2 >= s,"Error: out buf might be too small");
   char splitstr[2] = {split,0};
   return first_split(splitstr,in,out);
 }
