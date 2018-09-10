@@ -369,7 +369,7 @@ constexpr int parse_int(const char* src){
 
 template<typename str_holder>
 constexpr auto build_type_string(){
-  constexpr str_holder _str;
+  constexpr str_holder _str{};
   constexpr const char* src = _str();
   constexpr std::size_t len = str_len(src);
   if constexpr (len == 0) return String<>{};
