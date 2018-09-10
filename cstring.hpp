@@ -367,6 +367,49 @@ constexpr int parse_int(const char* src){
   return accum;
 }
 
+template<typename str_holder>
+constexpr auto build_type_string(){
+  constexpr str_holder _str;
+  constexpr const char* src = _str();
+  constexpr std::size_t len = str_len(src);
+  if constexpr (len == 0) return String<>{};
+  else if constexpr (len >= 10) {
+    struct rest_str{
+      constexpr const char* operator()() const {
+        return str_holder{}() + 10;
+      }
+      constexpr rest_str() = default;
+    };
+    return String<src[0],src[1],src[2],src[3],src[4],src[5],src[6],src[7],src[8],src[9]>::append(build_type_string<rest_str>());
+  }
+  else if constexpr (len >= 5){
+    struct rest_str{
+      constexpr const char* operator()() const {
+        return str_holder{}() + 5;
+      }
+      constexpr rest_str() = default;
+    };
+    return String<src[0],src[1],src[2],src[3],src[4]>::append(build_type_string<rest_str>());
+  }
+  else {
+    struct rest_str{
+      constexpr const char* operator()() const {
+        return str_holder{}() + 1;
+      }
+      constexpr rest_str() = default;
+    };
+    return String<src[0]>::append(build_type_string<rest_str>());
+  }
+}
+
+struct build_type_string_test{
+  constexpr build_type_string_test() = default;
+  constexpr const char* operator()() const {
+    return "This is a string I am converting for you";
+  }
+};
+static_assert(streq(build_type_string<build_type_string_test>().string, build_type_string_test{}()),"Build type string failed" );
+
 } // namespace cstring
 } // namespace mutils
 
