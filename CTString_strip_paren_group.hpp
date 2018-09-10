@@ -7,30 +7,23 @@ template <char lparen, char rparen>
 struct strip_paren_group_struct
 {
   // error case
+  template<typename l, typename r> struct pair{
+    constexpr pair() = default;
+    using first = l;
+    using second = r;
+  };
   template <typename StrippedSoFar, typename n>
   static constexpr auto strip_paren_group(n, String<>)
   {
     assert(lparen == rparen && "Error: expression ended before matching paren found");
-    struct pair
-    {
-      constexpr pair() = default;
-      using first = String<>;
-      using second = String<>;
-    };
-    return pair{};
+    return pair<String<>,String<>>{};
   }
 
   // final case
   template <typename StrippedSoFar, char... str2>
   static constexpr auto strip_paren_group(zero, String<rparen, str2...>)
   {
-    struct pair
-    {
-      using first = std::decay_t<decltype(StrippedSoFar::append(String<rparen>{}))>;
-      using second = String<str2...>;
-      constexpr pair() = default;
-    };
-    return pair{};
+    return pair<std::decay_t<decltype(StrippedSoFar::append(String<rparen>{}))>, String<str2...>>{};
   }
 
   // increase indent
