@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cassert>
 #include "17utils.hpp"
+#include "CTString.hpp"
 
 namespace mutils {
 namespace cstring {
