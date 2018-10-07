@@ -242,7 +242,7 @@ constexpr bool test_combine_strings() {
   return streq(out, "this is a string");
 }
 
-static_assert(test_combine_strings);
+static_assert(test_combine_strings());
 
 template <std::size_t size>
 constexpr bool contains_outside_parens(char target,
@@ -403,6 +403,18 @@ constexpr std::size_t trim(fixed_str<dst_size> &dst, const char *src) {
     }
   }
   return final_size;
+}
+
+template <std::size_t size>
+constexpr std::size_t first_word(fixed_str<size> &out, const char *in) {
+  fixed_str<size> pre_out = {0};
+  trim(pre_out, in);
+  auto i = 0u;
+  for (; pre_out[i] != 0 && !is_space(pre_out[i]) && !is_paren(pre_out[i]);
+       ++i) {
+    out[i] = pre_out[i];
+  }
+  return i;
 }
 
 constexpr int parse_int(const char *src) {
