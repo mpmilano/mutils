@@ -1,6 +1,6 @@
-#include "mutils.hpp"
+#include "mutils/mutils.hpp"
 #include <arpa/inet.h>
-#include "Hertz.hpp"
+#include "mutils/Hertz.hpp"
 #include <string.h>
 #include <cstdlib>
 #include <iostream>
