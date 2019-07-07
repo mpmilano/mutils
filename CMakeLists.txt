@@ -15,7 +15,7 @@ target_include_directories(mutils PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOUR
 
 #Make install
 install(TARGETS mutils EXPORT mutils
-        LIBRARY DESTINATION lib)
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/mutils
         DESTINATION include)
 
