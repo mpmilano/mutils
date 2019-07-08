@@ -10,6 +10,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_DEBUG "-std=c++14 -fPIC -g")
 set(CMAKE_SHARED_LINKER_FLAGS "-shared --enable-new-dtags")
 
+if ( NOT DEFINED CMAKE_INSTALL_LIBDIR )
+    set( CMAKE_INSTALL_LIBDIR lib )
+endif ( )
+
 add_library(mutils SHARED utils.cpp abiutils.cpp)
 target_include_directories(mutils PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
