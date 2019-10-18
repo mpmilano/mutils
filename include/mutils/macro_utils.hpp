@@ -47,6 +47,11 @@
 #define CONCAT_IMPL(count, ...) CONCAT_IMPL2(count, __VA_ARGS__)
 #define CONCAT(...) CONCAT_IMPL(VA_NARGS(__VA_ARGS__), __VA_ARGS__)
 
+#ifdef MUTILS_DEBUG
+#define whenmutilsdebug(...) __VA_ARGS___
+#else
+#define whenmutilsdebug(...)
+#endif
 
 #ifndef NDEBUG
 #define whendebug(x...) x
