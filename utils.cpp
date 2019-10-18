@@ -107,7 +107,7 @@ namespace mutils{
 		char ch; //to temporarily store the '.'
 		s >> a >> ch >> b >> ch >> c >> ch >> d;
 		iparr[0] = a, iparr[1] = b, iparr[2] = c, iparr[3] = d;
-#ifndef NDEBUG
+#ifdef MUTILS_DEBUG
 		{
 			int dbg = decode_ip(static_addr.c_str());
 			if (ret != dbg){
