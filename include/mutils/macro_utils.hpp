@@ -48,7 +48,7 @@
 #define CONCAT(...) CONCAT_IMPL(VA_NARGS(__VA_ARGS__), __VA_ARGS__)
 
 #ifdef MUTILS_DEBUG
-#define whenmutilsdebug(...) __VA_ARGS___
+#define whenmutilsdebug(...) __VA_ARGS__
 #else
 #define whenmutilsdebug(...)
 #endif
