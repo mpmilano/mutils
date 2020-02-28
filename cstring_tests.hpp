@@ -95,6 +95,11 @@ constexpr bool test_contains_outside_parens(){
 static_assert(contains_outside_parens("-","hndl2->a - 1"));
 static_assert(contains_outside_parens("- ","hndl2->a - 1"));
 
+		static_assert(num_words("  one  ") == 1);
+		static_assert(num_words("   ") == 0);
+		static_assert(num_words("  just  two  ") == 2);
+		static_assert(num_words("  just  quite a   few  ") == 4);
+
 constexpr bool trim_test(){
   {
     char out[40] = {0};

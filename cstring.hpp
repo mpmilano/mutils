@@ -417,6 +417,28 @@ constexpr std::size_t first_word(fixed_str<size> &out, const char *in) {
   return i;
 }
 
+
+	template<std::size_t size>
+	constexpr std::size_t num_words(const char* in){
+		fixed_str<size> trimmed = {0};
+		trim(trimmed, in);
+		if (str_len(trimmed) > 0){
+			if (contains(' ',trimmed)){
+				const char* idx = trimmed;
+				for (; *idx != ' '; ++idx);
+				++idx;
+				auto ret = num_words<size>(idx);
+				return 1 + ret;
+			} else return 1;
+		} else return 0;
+	}
+
+	template<std::size_t size>
+	constexpr std::size_t num_words(const fixed_cstr<size> &in){
+		const char* _in = in;
+		return num_words<size>(_in);
+	}
+
 constexpr int parse_int(const char *src) {
   const auto string_length = str_len(src);
   int multiplier = exp(10, string_length - 1);
