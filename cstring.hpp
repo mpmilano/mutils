@@ -450,6 +450,33 @@ constexpr int parse_int(const char *src) {
   return accum;
 }
 
+template <std::size_t size_dst>
+constexpr std::size_t reverse(fixed_str<size_dst> &out, char const * const in, std::size_t offset = 0){
+  auto out_index = offset + str_len(in)-1;
+  for (auto in_index = 0u; out_index >= offset; (--out_index, ++in_index)){
+    out[out_index] = in[in_index];
+  }
+  return str_len(in);
+}
+
+template <std::size_t size_dst>
+constexpr std::size_t print_int(fixed_str<size_dst> &out, std::size_t i, const std::size_t offset = 0){
+  if (i == 0) {
+    out[offset] = '0';
+    return 1;
+  }
+  else {
+    auto out_index = 0u;
+    fixed_str<size_dst> tmp = {0};
+    while (i != 0){
+      tmp[out_index++] = i%10 + '0';
+      i = i/10;
+    }
+    reverse(out,tmp,offset);
+    return out_index;
+  }
+}
+
 template <typename str_holder> constexpr auto build_type_string() {
   constexpr str_holder _str{};
   constexpr const char *src = _str();
