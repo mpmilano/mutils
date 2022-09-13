@@ -22,7 +22,7 @@ namespace mutils{
 
 		typedef ReturnType result_type;
 
-		template <size_t i>
+		template <std::size_t i>
 		struct arg
 		{
 			typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
