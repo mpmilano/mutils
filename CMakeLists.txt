@@ -1,13 +1,14 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.15.4)
 project (mutils)
+include(GNUInstallDirs)
 
 #Versions
 set(mutils_VERSION 1.0)
 
 #CXX FLAGS
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_CXX_FLAGS_DEBUG "-std=c++14 -fPIC -g")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_SHARED_LINKER_FLAGS "-shared --enable-new-dtags")
 
 if ( NOT DEFINED CMAKE_INSTALL_LIBDIR )
@@ -18,8 +19,9 @@ add_library(mutils SHARED utils.cpp abiutils.cpp)
 target_include_directories(mutils PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 #Make install
-install(TARGETS mutils EXPORT mutils
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mutils EXPORT mutilsTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY include/mutils
         DESTINATION include)
 
@@ -30,24 +32,21 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-export (EXPORT mutils
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/mutils/mutilsTargets.cmake"
-)
-
-configure_file (mutilsConfig.cmake
-  "${CMAKE_CURRENT_BINARY_DIR}/mutils/mutilsConfig.cmake"
-  COPYONLY
-)
-
 set(ConfigPackageLocation lib/cmake/mutils)
-install(EXPORT mutils
-  FILE mutilsTargets.cmake
-  DESTINATION ${ConfigPackageLocation}
+
+configure_package_config_file(mutilsConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/mutils/mutilsConfig.cmake"
+    INSTALL_DESTINATION ${ConfigPackageLocation}
+    PATH_VARS CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR ConfigPackageLocation
 )
 
-install(
-  FILES
-    mutilsConfig.cmake
+install(EXPORT mutilsTargets
+    FILE mutilsTargets.cmake
+    NAMESPACE mutils::
+    DESTINATION ${ConfigPackageLocation})
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/mutils/mutilsConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/mutils/mutilsConfigVersion.cmake"
   DESTINATION ${ConfigPackageLocation}
 )
